@@ -108,6 +108,11 @@
       <artifactId>fccclient</artifactId>
       <version>${tc.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.teamcenter</groupId>
+      <artifactId>TcSoaAdministrationStrong</artifactId>
+      <version>${tc.version}</version>
+    </dependency>
   </dependencies>
 
 </project>
