@@ -13,18 +13,38 @@ import com.teamcenter.soa.client.model.ModelObject;
 import com.teamcenter.soa.client.model.ServiceData;
 import com.teamcenter.soa.client.model.strong.Folder;
 import com.teamcenter.soa.client.model.strong.Item;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.Optional;
 
-@Slf4j
+/**
+ * Data management util
+ */
 public class DataManagementUtil {
 
     private static final Connection connection = AppXSession.getConnection();
     private static final DataManagementService dmService = DataManagementService.getService(connection);
 
-    public static boolean refresh(ModelObject mo) {
+    /**
+     * Refresh model object
+     *
+     * @param mo the model object
+     * @return true if successful, otherwise false
+     */
+    public static boolean refreshMo(ModelObject mo) {
         ServiceData serviceData = dmService.refreshObjects(new ModelObject[]{mo});
+
+        return !ServiceUtil.catchPartialErrors(serviceData);
+    }
+
+    /**
+     * Get property from tc
+     *
+     * @param mo       the model object
+     * @param propName the property name
+     * @return true if successful, otherwise false
+     */
+    public static boolean getProperty(ModelObject mo, String propName) {
+        ServiceData serviceData = dmService.getProperties(new ModelObject[]{mo}, new String[]{propName});
 
         return !ServiceUtil.catchPartialErrors(serviceData);
     }

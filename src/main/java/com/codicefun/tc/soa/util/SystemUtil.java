@@ -12,6 +12,7 @@ public class SystemUtil {
 
     /**
      * Check if the system is Windows
+     *
      * @return true if the system is Windows, false otherwise
      */
     public static boolean isWindows() {
@@ -20,6 +21,7 @@ public class SystemUtil {
 
     /**
      * Check if the system is Linux
+     *
      * @return true if the system is Linux, false otherwise
      */
     public static boolean isLinux() {
@@ -28,6 +30,7 @@ public class SystemUtil {
 
     /**
      * Check if the system is macOS
+     *
      * @return true if the system is macOS, false otherwise
      */
     public static boolean isMac() {
@@ -36,6 +39,7 @@ public class SystemUtil {
 
     /**
      * Check if the system is Unix
+     *
      * @return true if the system is Unix, false otherwise
      */
     public static boolean isUnix() {

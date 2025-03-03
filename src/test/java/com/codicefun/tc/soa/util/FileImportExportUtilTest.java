@@ -4,20 +4,23 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * File import export util test
+ * <p>
+ * TODO: Finish FileImportExportUtilTest
+ */
 class FileImportExportUtilTest {
 
     @Test
-    void testExportBom2ExcelByAttrs() {
-        // TODO: implement testExportBom2ExcelByAttrs
+    void exportBom2ExcelByAttrs() {
         Optional<String> result = FileImportExportUtil.exportBom2ExcelByAttrs(null, null);
         assertTrue(result.isPresent());
     }
 
     @Test
-    void testExportBom2ExcelByTemplateId() {
-        // TODO: implement testExportBom2ExcelByTemplateId
+    void exportBom2ExcelByTemplateId() {
         Optional<String> result = FileImportExportUtil.exportBom2ExcelByTemplateId(null, null);
         assertTrue(result.isPresent());
     }
