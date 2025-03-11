@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Workflow utility class
+ * <p>
+ * TODO: Add more operations: Replace and Rename
  */
 @Slf4j
 public class WorkflowUtil {
@@ -28,17 +30,16 @@ public class WorkflowUtil {
      * @param oldStatus the old status
      * @return true if successful, otherwise false
      */
-    public static boolean setReleaseStatus(WorkspaceObject obj, String operation, String newStatus, String oldStatus) {
+    private static boolean setReleaseStatus(WorkspaceObject obj, String operation, String newStatus, String oldStatus) {
         try {
             ReleaseStatusInput[] inputs = new ReleaseStatusInput[1];
             inputs[0] = new ReleaseStatusInput();
             inputs[0].objects = new WorkspaceObject[]{obj};
             inputs[0].operations = new ReleaseStatusOption[1];
+            inputs[0].operations[0] = new ReleaseStatusOption();
             inputs[0].operations[0].operation = operation;
             inputs[0].operations[0].newReleaseStatusTypeName = newStatus;
-            if (oldStatus != null) {
-                inputs[0].operations[0].existingreleaseStatusTypeName = oldStatus;
-            }
+            inputs[0].operations[0].existingreleaseStatusTypeName = oldStatus;
             SetReleaseStatusResponse response = workflowService.setReleaseStatus(inputs);
             return !ServiceUtil.catchPartialErrors(response.serviceData);
         } catch (ServiceException e) {
@@ -48,14 +49,35 @@ public class WorkflowUtil {
     }
 
     /**
-     * Add release status
+     * Append release status
      *
      * @param obj    the workspace object
      * @param status the status
      * @return true if successful, otherwise false
      */
-    public static boolean addReleaseStatus(WorkspaceObject obj, String status) {
+    public static boolean appendReleaseStatus(WorkspaceObject obj, String status) {
         return setReleaseStatus(obj, "Append", status, null);
+    }
+
+    /**
+     * Delete release status
+     *
+     * @param obj    the workspace object
+     * @param status the status
+     * @return true if successful, otherwise false
+     */
+    public static boolean deleteReleaseStatus(WorkspaceObject obj, String status) {
+        return setReleaseStatus(obj, "Delete", status, null);
+    }
+
+    /**
+     * Delete all release status
+     *
+     * @param obj the workspace object
+     * @return true if successful, otherwise false
+     */
+    public static boolean deleteAllReleaseStatus(WorkspaceObject obj) {
+        return deleteReleaseStatus(obj, null);
     }
 
 }
