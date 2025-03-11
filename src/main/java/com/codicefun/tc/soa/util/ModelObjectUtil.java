@@ -4,19 +4,29 @@ import com.teamcenter.soa.client.model.ModelObject;
 import com.teamcenter.soa.exceptions.NotLoadedException;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Model object util
+ */
 @Slf4j
-public class MoUtil {
+public class ModelObjectUtil {
 
-    public static String getPropStringValue(ModelObject mo, String propName) {
+    /**
+     * Get property string value
+     *
+     * @param obj      Model object
+     * @param propName Property name
+     * @return Property value
+     */
+    public static String getPropStringValue(ModelObject obj, String propName) {
         String propValue = "";
 
-        if (mo == null) {
+        if (obj == null) {
             return propValue;
         }
 
-        DataManagementUtil.getProperty(mo, propName);
+        DataManagementUtil.getProperty(obj, propName);
         try {
-            propValue = mo.getPropertyObject(propName).getStringValue();
+            propValue = obj.getPropertyObject(propName).getStringValue();
         } catch (NotLoadedException e) {
             log.error("Get property failed: {}", e.getMessage(), e);
         }
@@ -24,16 +34,23 @@ public class MoUtil {
         return propValue;
     }
 
-    public static String getPropDisplayableValue(ModelObject mo, String propName) {
+    /**
+     * Get property displayable value
+     *
+     * @param obj      Model object
+     * @param propName Property name
+     * @return Property value
+     */
+    public static String getPropDisplayableValue(ModelObject obj, String propName) {
         String propValue = "";
 
-        if (mo == null) {
+        if (obj == null) {
             return propValue;
         }
 
-        DataManagementUtil.getProperty(mo, propName);
+        DataManagementUtil.getProperty(obj, propName);
         try {
-            propValue = mo.getPropertyObject(propName).getDisplayableValue();
+            propValue = obj.getPropertyObject(propName).getDisplayableValue();
         } catch (NotLoadedException e) {
             log.error("Get property failed: {}", e.getMessage(), e);
         }
@@ -41,6 +58,13 @@ public class MoUtil {
         return propValue;
     }
 
+    /**
+     * Get property array values
+     *
+     * @param obj      Model object
+     * @param propName Property name
+     * @return Property value
+     */
     public static ModelObject[] getPropArrayValues(ModelObject obj, String propName) {
         ModelObject[] propValues = new ModelObject[]{};
 

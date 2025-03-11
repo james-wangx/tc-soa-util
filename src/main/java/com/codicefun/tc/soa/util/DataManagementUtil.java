@@ -4,16 +4,25 @@ import com.codicefun.tc.soa.clientx.AppXSession;
 import com.teamcenter.services.strong.core.DataManagementService;
 import com.teamcenter.services.strong.core._2006_03.DataManagement.CreateItemsResponse;
 import com.teamcenter.services.strong.core._2006_03.DataManagement.ItemProperties;
+import com.teamcenter.services.strong.core._2007_01.DataManagement.GetItemFromIdPref;
 import com.teamcenter.services.strong.core._2008_06.DataManagement.GetNRPatternsWithCountersResponse;
 import com.teamcenter.services.strong.core._2008_06.DataManagement.GetNextIdsResponse;
 import com.teamcenter.services.strong.core._2008_06.DataManagement.InfoForNextId;
 import com.teamcenter.services.strong.core._2008_06.DataManagement.NRAttachInfo;
+import com.teamcenter.services.strong.core._2009_10.DataManagement.GetItemFromAttributeInfo;
+import com.teamcenter.services.strong.core._2009_10.DataManagement.GetItemFromAttributeResponse;
+import com.teamcenter.services.strong.core._2010_09.DataManagement.NameValueStruct1;
+import com.teamcenter.services.strong.core._2010_09.DataManagement.PropInfo;
+import com.teamcenter.services.strong.core._2010_09.DataManagement.SetPropertyResponse;
 import com.teamcenter.soa.client.Connection;
 import com.teamcenter.soa.client.model.ModelObject;
 import com.teamcenter.soa.client.model.ServiceData;
 import com.teamcenter.soa.client.model.strong.Folder;
 import com.teamcenter.soa.client.model.strong.Item;
+import com.teamcenter.soa.client.model.strong.ItemRevision;
 
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 /**
@@ -134,6 +143,65 @@ public class DataManagementUtil {
         }
 
         return Optional.ofNullable(response.output[0].item);
+    }
+
+    /**
+     * Get item from id
+     *
+     * @param itemId the item id
+     * @return the item
+     */
+    public static Optional<Item> getItemFromId(String itemId) {
+        GetItemFromAttributeInfo[] infos = new GetItemFromAttributeInfo[1];
+        infos[0] = new GetItemFromAttributeInfo();
+        infos[0].itemAttributes.put("item_id", itemId);
+        GetItemFromIdPref pref = new GetItemFromIdPref();
+        GetItemFromAttributeResponse response = dmService.getItemFromAttribute(infos, -1, pref);
+        if (ServiceUtil.catchPartialErrors(response.serviceData)
+            || response.output == null
+            || response.output.length == 0) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(response.output[0].item);
+    }
+
+    /**
+     * Set properties
+     *
+     * @param obj     the model object
+     * @param propMap the property map
+     * @return true if successful, otherwise false
+     */
+    public static boolean setProperties(ModelObject obj, Map<String, String> propMap) {
+        PropInfo[] infos = new PropInfo[1];
+        infos[0] = new PropInfo();
+        infos[0].object = obj;
+        NameValueStruct1[] structs = new NameValueStruct1[propMap.size()];
+        int i = 0;
+        for (Entry<String, String> entry : propMap.entrySet()) {
+            NameValueStruct1 struct = new NameValueStruct1();
+            struct.name = entry.getKey();
+            struct.values = new String[]{entry.getValue()};
+            structs[i++] = struct;
+        }
+        infos[0].vecNameVal = structs;
+
+        SetPropertyResponse response = dmService.setProperties(infos, null);
+        return ServiceUtil.catchPartialErrors(response.data)
+               || response.objPropMap == null
+               || response.objPropMap.isEmpty();
+    }
+
+    /**
+     * Get latest item revision
+     *
+     * @param item the item
+     * @return the latest item revision
+     */
+    public static Optional<ItemRevision> getLatestItemRevision(Item item) {
+        ModelObject[] revisions = ModelObjectUtil.getPropArrayValues(item, "revision_list");
+        return Optional.ofNullable((ItemRevision) revisions[revisions.length - 1]);
     }
 
 }
