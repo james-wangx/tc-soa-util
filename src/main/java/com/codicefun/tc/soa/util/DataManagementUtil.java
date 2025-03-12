@@ -200,7 +200,11 @@ public class DataManagementUtil {
      * @return the latest item revision
      */
     public static Optional<ItemRevision> getLatestItemRevision(Item item) {
-        ModelObject[] revisions = ModelObjectUtil.getPropArrayValues(item, "revision_list");
+        ModelObject[] revisions = ModelObjectUtil.getPropArrayValues(item, "revision_list").orElse(new ModelObject[0]);
+        if (revisions.length == 0) {
+            return Optional.empty();
+        }
+
         return Optional.ofNullable((ItemRevision) revisions[revisions.length - 1]);
     }
 

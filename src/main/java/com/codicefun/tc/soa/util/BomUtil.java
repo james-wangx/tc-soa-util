@@ -14,6 +14,7 @@ import com.teamcenter.soa.exceptions.NotLoadedException;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Bom util
@@ -52,7 +53,7 @@ public class BomUtil {
 
         PSBOMView bomView = getPSBOMView(itemRev);
         if (bomView != null) {
-            dmService.refreshObjects(new PSBOMView[]{bomView});
+            DataManagementUtil.refreshMo(bomView);
         }
 
         CreateWindowsInfo3 info = new CreateWindowsInfo3();
@@ -67,10 +68,10 @@ public class BomUtil {
     /**
      * Get absolute occurrence context property list
      */
-    public static List<String> getAbsOccCxtPropList(BOMLine bomLine) {
-        String propsInContext = ModelObjectUtil.getPropStringValue(bomLine, "bl_properties_in_context");
+    public static Optional<List<String>> getAbsOccCxtPropList(BOMLine bomLine) {
+        Optional<String> result = ModelObjectUtil.getPropStringValue(bomLine, "bl_properties_in_context");
 
-        return Arrays.asList(propsInContext.split(","));
+        return result.map(s -> Arrays.asList(s.split(",")));
     }
 
     /**
@@ -92,26 +93,6 @@ public class BomUtil {
         ExpandPSOneLevelOutput expandOutput = expandOutputs[0];
 
         return expandOutput.children;
-    }
-
-    /**
-     * Print all absolute occurrence context property list
-     */
-    public static void printAbsOccCxtProp(BOMLine bomLine) {
-        ExpandPSData[] children = getChildren(bomLine);
-        if (children == null) {
-            return;
-        }
-
-        for (ExpandPSData child : children) {
-            BOMLine childBOMLine = child.bomLine;
-            String title = ModelObjectUtil.getPropStringValue(childBOMLine, "bl_indented_title");
-            System.out.println("title = " + title);
-            List<String> absOccCxtPropList = getAbsOccCxtPropList(childBOMLine);
-            System.out.println("absOccCxtPropList = " + absOccCxtPropList);
-            System.out.println("-------------------------------------------------------------------------------------");
-            printAbsOccCxtProp(childBOMLine);
-        }
     }
 
 }
