@@ -2,20 +2,15 @@ package com.codicefun.tc.soa.util;
 
 import com.codicefun.tc.soa.clientx.AppXSession;
 import com.teamcenter.services.strong.core.DataManagementService;
-import com.teamcenter.services.strong.core._2006_03.DataManagement.CreateFolderInput;
-import com.teamcenter.services.strong.core._2006_03.DataManagement.CreateFoldersResponse;
-import com.teamcenter.services.strong.core._2006_03.DataManagement.CreateItemsResponse;
-import com.teamcenter.services.strong.core._2006_03.DataManagement.ItemProperties;
+import com.teamcenter.services.strong.core._2006_03.DataManagement.*;
 import com.teamcenter.services.strong.core._2007_01.DataManagement.GetItemFromIdPref;
-import com.teamcenter.services.strong.core._2008_06.DataManagement.GetNRPatternsWithCountersResponse;
-import com.teamcenter.services.strong.core._2008_06.DataManagement.GetNextIdsResponse;
-import com.teamcenter.services.strong.core._2008_06.DataManagement.InfoForNextId;
-import com.teamcenter.services.strong.core._2008_06.DataManagement.NRAttachInfo;
+import com.teamcenter.services.strong.core._2008_06.DataManagement.*;
 import com.teamcenter.services.strong.core._2009_10.DataManagement.GetItemFromAttributeInfo;
 import com.teamcenter.services.strong.core._2009_10.DataManagement.GetItemFromAttributeResponse;
 import com.teamcenter.services.strong.core._2010_09.DataManagement.NameValueStruct1;
 import com.teamcenter.services.strong.core._2010_09.DataManagement.PropInfo;
 import com.teamcenter.services.strong.core._2010_09.DataManagement.SetPropertyResponse;
+import com.teamcenter.services.strong.core._2015_07.DataManagement.CreateIn2;
 import com.teamcenter.soa.client.Connection;
 import com.teamcenter.soa.client.model.ModelObject;
 import com.teamcenter.soa.client.model.ServiceData;
@@ -219,6 +214,7 @@ public class DataManagementUtil {
      */
     public static Optional<Folder> createFolder(Folder parent, String name) {
         CreateFolderInput[] inputs = new CreateFolderInput[1];
+        inputs[0] = new CreateFolderInput();
         inputs[0].name = name;
         CreateFoldersResponse response = dmService.createFolders(inputs, parent, "");
 
@@ -229,6 +225,50 @@ public class DataManagementUtil {
         }
 
         return Optional.ofNullable(response.output[0].folder);
+    }
+
+    /**
+     * Create object and relate to parent object
+     *
+     * @param parent  the parent object to be related
+     * @param type    the new object type
+     * @param propMap the property map
+     * @return the new object
+     */
+    public static Optional<ModelObject> createObject(ModelObject parent, String type, Map<String, String[]> propMap) {
+        CreateIn2[] inputs = new CreateIn2[1];
+        inputs[0] = new CreateIn2();
+        inputs[0].targetObject = parent;
+        inputs[0].createData.boName = type;
+        inputs[0].createData.propertyNameValues = propMap;
+        CreateResponse response = dmService.createRelateAndSubmitObjects2(inputs);
+        if (ServiceUtil.catchPartialErrors(response.serviceData) ||
+            response.output == null ||
+            response.output.length == 0 ||
+            response.output[0].objects == null ||
+            response.output[0].objects.length == 0) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(response.output[0].objects[0]);
+    }
+
+    /**
+     * Copy a model object to a folder
+     *
+     * @param from the model object
+     * @param to   the folder
+     * @return success or failed
+     */
+    public static boolean copy(ModelObject from, Folder to) {
+        Relationship[] inputs = new Relationship[1];
+        inputs[0] = new Relationship();
+        inputs[0].primaryObject = to;
+        inputs[0].secondaryObject = from;
+        inputs[0].relationType = "contents";
+        CreateRelationsResponse response = dmService.createRelations(inputs);
+
+        return !ServiceUtil.catchPartialErrors(response.serviceData);
     }
 
 }

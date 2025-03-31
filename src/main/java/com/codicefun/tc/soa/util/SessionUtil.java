@@ -9,6 +9,7 @@ import com.teamcenter.services.strong.core._2007_01.Session.GetTCSessionInfoResp
 import com.teamcenter.services.strong.core._2007_12.Session.StateNameValue;
 import com.teamcenter.soa.client.Connection;
 import com.teamcenter.soa.client.model.Property;
+import com.teamcenter.soa.client.model.ServiceData;
 import com.teamcenter.soa.client.model.strong.Folder;
 import com.teamcenter.soa.client.model.strong.User;
 import com.teamcenter.soa.exceptions.NotLoadedException;
@@ -62,11 +63,14 @@ public class SessionUtil {
 
     public static boolean logout() {
         try {
-            sessionService.logout();
+            ServiceData serviceData = sessionService.logout();
+            if (ServiceUtil.catchPartialErrors(serviceData)) {
+                return false;
+            }
             log.info("Logout successful");
             return true;
         } catch (ServiceException e) {
-            log.error("Logout failed", e);
+            log.error("Logout failed: {}", e.getMessage(), e);
             return false;
         }
     }

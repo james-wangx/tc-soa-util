@@ -1,13 +1,11 @@
 package com.codicefun.tc.soa.util;
 
-import com.codicefun.tc.soa.clientx.AppXSession;
 import com.codicefun.tc.soa.exception.TestException;
-import com.teamcenter.soa.client.Connection;
+import com.teamcenter.soa.client.model.strong.Folder;
 import com.teamcenter.soa.client.model.strong.Item;
 import com.teamcenter.soa.client.model.strong.ItemRevision;
 import com.teamcenter.soa.exceptions.NotLoadedException;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -21,15 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * <p>
  * TODO: Finish DataManagementUtilTest
  */
-class DataManagementUtilTest {
-
-    static Connection connection;
-
-    @BeforeAll
-    static void init() {
-        SessionUtil.login("http://192.168.80.101:8888/tc", "00001", "00001", "tc-soa-util-test");
-        connection = AppXSession.getConnection();
-    }
+class DataManagementUtilTest extends UtilTest {
 
     @Test
     void refreshMo() {
@@ -112,4 +102,20 @@ class DataManagementUtilTest {
         }
     }
 
+    @Test
+    void createFolder() {
+        Folder homeFolder = SessionUtil.getHomeFolder()
+                                       .orElseThrow(() -> new TestException("Not found home folder"));
+        Optional<Folder> folderOptional = DataManagementUtil.createFolder(homeFolder, "createFolderTest");
+
+        assertTrue(folderOptional.isPresent());
+    }
+
+    @Test
+    void createObject() {
+    }
+
+    @Test
+    void copy() {
+    }
 }
