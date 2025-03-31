@@ -6,7 +6,10 @@ $artifacts = @(
     "TcSoaQueryStrong",
     "TcSoaImportExportStrong",
     "TcSoaCadStrong",
-    "TcSoaClassificationStrong"
+    "TcSoaClassificationStrong",
+    "TcSoaAdministrationStrong",
+    "TcSoaWorkflowStrong",
+    "TcSoaStructureManagementStrong"
 )
 
 $libHome = "C:\Program Files\Siemens\TC13.3_ROOT\soa_client\java\libs"

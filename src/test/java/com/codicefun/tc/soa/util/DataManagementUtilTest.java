@@ -1,10 +1,12 @@
 package com.codicefun.tc.soa.util;
 
+import com.codicefun.tc.soa.clientx.AppXSession;
 import com.codicefun.tc.soa.exception.TestException;
-import com.teamcenter.soa.client.model.ModelObject;
+import com.teamcenter.soa.client.Connection;
 import com.teamcenter.soa.client.model.strong.Item;
 import com.teamcenter.soa.client.model.strong.ItemRevision;
 import com.teamcenter.soa.exceptions.NotLoadedException;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -21,9 +23,12 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class DataManagementUtilTest {
 
+    static Connection connection;
+
     @BeforeAll
     static void init() {
         SessionUtil.login("http://192.168.80.101:8888/tc", "00001", "00001", "tc-soa-util-test");
+        connection = AppXSession.getConnection();
     }
 
     @Test
@@ -38,10 +43,9 @@ class DataManagementUtilTest {
         assertTrue(result);
     }
 
-    @Test
-    void findMoByUid() {
-        Optional<ModelObject> result = DataManagementUtil.findMoByUid(null);
-        assertTrue(result.isPresent());
+    @AfterAll
+    static void destroy() {
+        // SessionUtil.logout();
     }
 
     @Test
@@ -91,6 +95,21 @@ class DataManagementUtilTest {
     @Test
     void getLatestItemRevision() {
 
+    }
+
+    @Test
+    void findMoByUid() {
+        for (int i = 0; i < 5; i++) {
+            ItemRevision itemRevision = (ItemRevision) DataManagementUtil.findMoByUid("QLqdt490o0c12D")
+                                                                         .orElseThrow(() -> new TestException(
+                                                                                 "Not found item revision"));
+            DataManagementUtil.refreshMo(itemRevision);
+            String desc = ModelObjectUtil.getPropStringValue(itemRevision, "object_desc")
+                                         .orElseThrow(() -> new TestException("Not found property"));
+
+            System.out.println("desc = " + desc);
+            connection.getClientDataModel().removeAllObjects();
+        }
     }
 
 }

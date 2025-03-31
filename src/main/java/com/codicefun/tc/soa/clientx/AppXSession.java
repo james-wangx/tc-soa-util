@@ -69,7 +69,7 @@ public class AppXSession
             protocol   = SoaConstants.TCCS;
             host = host.trim();
             int envNameStart = host.indexOf('/') + 2;
-            envNameTccs = host.substring( envNameStart, host.length() );
+            envNameTccs = host.substring( envNameStart);
             host = "";
         }
         else
@@ -87,6 +87,7 @@ public class AppXSession
            connection.setOption(  Connection.TCCS_ENV_NAME, envNameTccs );
         }
 
+        // connection.setOption("OPT_CACHE_MODEL_OBJECTS", "false");
 
         // Add an ExceptionHandler to the Connection, this will handle any
         // InternalServerException, communication errors, XML marshaling errors
@@ -252,7 +253,7 @@ public class AppXSession
                     unKnownUsers.add(owner);
             }
         }
-        User[] users = (User[])unKnownUsers.toArray(new User[unKnownUsers.size()]);
+        User[] users = unKnownUsers.toArray(new User[unKnownUsers.size()]);
         String[] attributes = { "user_name" };
 
 

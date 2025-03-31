@@ -2,6 +2,8 @@ package com.codicefun.tc.soa.util;
 
 import com.codicefun.tc.soa.clientx.AppXSession;
 import com.teamcenter.services.strong.core.DataManagementService;
+import com.teamcenter.services.strong.core._2006_03.DataManagement.CreateFolderInput;
+import com.teamcenter.services.strong.core._2006_03.DataManagement.CreateFoldersResponse;
 import com.teamcenter.services.strong.core._2006_03.DataManagement.CreateItemsResponse;
 import com.teamcenter.services.strong.core._2006_03.DataManagement.ItemProperties;
 import com.teamcenter.services.strong.core._2007_01.DataManagement.GetItemFromIdPref;
@@ -187,7 +189,7 @@ public class DataManagementUtil {
         }
         infos[0].vecNameVal = structs;
 
-        SetPropertyResponse response = dmService.setProperties(infos, null);
+        SetPropertyResponse response = dmService.setProperties(infos, new String[]{});
         return ServiceUtil.catchPartialErrors(response.data)
                || response.objPropMap == null
                || response.objPropMap.isEmpty();
@@ -206,6 +208,27 @@ public class DataManagementUtil {
         }
 
         return Optional.ofNullable((ItemRevision) revisions[revisions.length - 1]);
+    }
+
+    /**
+     * Create folder by parent folder object and new folder name
+     *
+     * @param parent parent folder object
+     * @param name   new folder name
+     * @return new folder
+     */
+    public static Optional<Folder> createFolder(Folder parent, String name) {
+        CreateFolderInput[] inputs = new CreateFolderInput[1];
+        inputs[0].name = name;
+        CreateFoldersResponse response = dmService.createFolders(inputs, parent, "");
+
+        if (ServiceUtil.catchPartialErrors(response.serviceData) ||
+            response.output == null ||
+            response.output.length == 0) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(response.output[0].folder);
     }
 
 }

@@ -118,6 +118,11 @@
       <artifactId>TcSoaWorkflowStrong</artifactId>
       <version>${tc.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.teamcenter</groupId>
+      <artifactId>TcSoaStructureManagementStrong</artifactId>
+      <version>${tc.version}</version>
+    </dependency>
   </dependencies>
 
 </project>
