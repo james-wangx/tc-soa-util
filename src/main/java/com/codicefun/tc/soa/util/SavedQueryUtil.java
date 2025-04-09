@@ -1,7 +1,7 @@
 package com.codicefun.tc.soa.util;
 
 import com.codicefun.tc.soa.clientx.AppXSession;
-import com.codicefun.tc.soa.exception.UtilException;
+import com.codicefun.tc.soa.exception.SoaUtilException;
 import com.teamcenter.schemas.soa._2006_03.exceptions.ServiceException;
 import com.teamcenter.services.strong.query.SavedQueryService;
 import com.teamcenter.services.strong.query._2006_03.SavedQuery.GetSavedQueriesResponse;
@@ -43,7 +43,7 @@ public class SavedQueryUtil {
     public static Optional<ModelObject> queryOneObject(String name, String[] entries, String[] values) {
         try {
             ImanQuery query = getSavedQueryByName(name).orElseThrow(
-                    () -> new UtilException("Not found saved query by name: " + name));
+                    () -> new SoaUtilException("Not found saved query by name: " + name));
 
             QueryInput[] inputs = new QueryInput[1];
             inputs[0] = new QueryInput();
@@ -62,11 +62,11 @@ public class SavedQueryUtil {
 
             String uid = response.arrayOfResults[0].objectUIDS[0];
             ModelObject obj = DataManagementUtil.findMoByUid(uid)
-                                                .orElseThrow(() -> new UtilException(
+                                                .orElseThrow(() -> new SoaUtilException(
                                                         "Not found model object by uid: " + uid));
 
             return Optional.ofNullable(obj);
-        } catch (UtilException e) {
+        } catch (SoaUtilException e) {
             log.error(e.getMessage(), e);
             return Optional.empty();
         }

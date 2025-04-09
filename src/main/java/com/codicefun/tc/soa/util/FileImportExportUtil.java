@@ -1,7 +1,7 @@
 package com.codicefun.tc.soa.util;
 
 import com.codicefun.tc.soa.clientx.AppXSession;
-import com.codicefun.tc.soa.exception.UtilException;
+import com.codicefun.tc.soa.exception.SoaUtilException;
 import com.teamcenter.schemas.soa._2006_03.exceptions.ServiceException;
 import com.teamcenter.services.strong.importexport.FileImportExportService;
 import com.teamcenter.services.strong.importexport._2011_06.FileImportExport.ExportToApplicationInputData2;
@@ -25,7 +25,7 @@ public class FileImportExportUtil {
      */
     private static final String TRANSIENT_DIRECTORY = PreferenceManagementUtil
             .getValueByNameAndPrefix("Transient_Volume_RootDir", SystemUtil.isWindows() ? "c:" : "/")
-            .orElseThrow(() -> new UtilException("Not found Transient_Volume_RootDir"));
+            .orElseThrow(() -> new SoaUtilException("Not found Transient_Volume_RootDir"));
 
     /**
      * Transient file separator: ";\"

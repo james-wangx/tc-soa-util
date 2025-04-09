@@ -1,7 +1,7 @@
 package com.codicefun.tc.soa.util;
 
 import com.codicefun.tc.soa.clientx.AppXSession;
-import com.codicefun.tc.soa.exception.UtilException;
+import com.codicefun.tc.soa.exception.SoaUtilException;
 import com.teamcenter.schemas.soa._2006_03.exceptions.ServiceException;
 import com.teamcenter.services.strong.core.SessionService;
 import com.teamcenter.services.strong.core._2006_03.Session;
@@ -79,11 +79,11 @@ public class SessionUtil {
         try {
             if (sessionInfoResponse == null) {
                 sessionInfoResponse = getSessionInfo().orElseThrow(
-                        () -> new UtilException("Failed to retrieve session info"));
+                        () -> new SoaUtilException("Failed to retrieve session info"));
             }
 
             return Optional.ofNullable(sessionInfoResponse.user);
-        } catch (UtilException e) {
+        } catch (SoaUtilException e) {
             log.error(e.getMessage(), e);
             return Optional.empty();
         }
@@ -91,11 +91,11 @@ public class SessionUtil {
 
     public static Optional<Folder> getHomeFolder() {
         try {
-            User user = getUser().orElseThrow(() -> new UtilException("Failed to retrieve user"));
+            User user = getUser().orElseThrow(() -> new SoaUtilException("Failed to retrieve user"));
             Folder homeFolder = user.get_home_folder();
 
             return Optional.ofNullable(homeFolder);
-        } catch (NotLoadedException | UtilException e) {
+        } catch (NotLoadedException | SoaUtilException e) {
             log.error(e.getMessage(), e);
             return Optional.empty();
         }
