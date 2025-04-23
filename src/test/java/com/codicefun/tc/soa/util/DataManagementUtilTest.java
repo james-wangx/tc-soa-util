@@ -118,4 +118,13 @@ class DataManagementUtilTest extends UtilTest {
     @Test
     void copy() {
     }
+
+    @Test
+    void deleteObject() {
+        Item item = (Item) DataManagementUtil.findMoByUid("gKghAytvo0c12D")
+                                             .orElseThrow(() -> new TestException("Not found item"));
+        boolean result = DataManagementUtil.deleteObject(item);
+
+        assertTrue(result);
+    }
 }

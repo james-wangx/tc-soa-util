@@ -185,9 +185,8 @@ public class DataManagementUtil {
         infos[0].vecNameVal = structs;
 
         SetPropertyResponse response = dmService.setProperties(infos, new String[]{});
-        return ServiceUtil.catchPartialErrors(response.data)
-               || response.objPropMap == null
-               || response.objPropMap.isEmpty();
+
+        return !ServiceUtil.catchPartialErrors(response.data);
     }
 
     /**
@@ -269,6 +268,18 @@ public class DataManagementUtil {
         CreateRelationsResponse response = dmService.createRelations(inputs);
 
         return !ServiceUtil.catchPartialErrors(response.serviceData);
+    }
+
+    /**
+     * Delete a model object
+     *
+     * @param obj the model object
+     * @return success or failed
+     */
+    public static boolean deleteObject(ModelObject obj) {
+        ServiceData serviceData = dmService.deleteObjects(new ModelObject[]{obj});
+
+        return !ServiceUtil.catchPartialErrors(serviceData);
     }
 
 }
