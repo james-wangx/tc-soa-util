@@ -24,12 +24,14 @@ public class SessionUtil {
 
     private static GetTCSessionInfoResponse sessionInfoResponse;
 
-    public static boolean login(String host, String username, String password, String sessionDiscriminator) {
+    public static boolean login(String host, String username, String password, String locale,
+                                String sessionDiscriminator) {
         try {
             new AppXSession(host);
             Connection connection = AppXSession.getConnection();
             sessionService = SessionService.getService(connection);
-            Session.LoginResponse response = sessionService.login(username, password, "", "", "", sessionDiscriminator);
+            Session.LoginResponse response = sessionService.login(username, password, "", "", locale,
+                                                                  sessionDiscriminator);
             User user = response.user;
             log.info("Login with user {}", user.get_user_name());
             return true;

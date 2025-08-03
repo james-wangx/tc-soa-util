@@ -1,26 +1,15 @@
 package com.codicefun.tc.soa.util;
 
-import com.codicefun.tc.soa.clientx.AppXSession;
 import com.codicefun.tc.soa.exception.TestException;
 import com.teamcenter.services.strong.cad._2007_01.StructureManagement.CreateBOMWindowsOutput;
-import com.teamcenter.soa.client.Connection;
 import com.teamcenter.soa.client.model.strong.BOMLine;
 import com.teamcenter.soa.client.model.strong.ItemRevision;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class StructureUtilTest {
-
-    static Connection connection;
-
-    @BeforeAll
-    static void init() {
-        SessionUtil.login("http://192.168.80.101:8888/tc", "james", "james", "tc-soa-util-test");
-        connection = AppXSession.getConnection();
-    }
+class StructureUtilTest extends UtilTest {
 
     @Test
     void addChild() {

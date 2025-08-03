@@ -127,4 +127,23 @@ class DataManagementUtilTest extends UtilTest {
 
         assertTrue(result);
     }
+
+    @Test
+    void getNextRevId() {
+        ItemRevision rev = (ItemRevision) DataManagementUtil.findMoByUid("w6mhmRp0o0c12D")
+                                                            .orElseThrow(() -> new TestException("Not found revision"));
+        String newRevId = DataManagementUtil.getNextRevId(rev)
+                                            .orElseThrow(() -> new TestException("Not found revision"));
+        System.out.println("newRevId = " + newRevId);
+    }
+
+    @Test
+    void revise() {
+        ItemRevision rev = (ItemRevision) DataManagementUtil.findMoByUid("w6mhmRp0o0c12D")
+                                                            .orElseThrow(() -> new TestException("Not found revision"));
+        ItemRevision newRev = DataManagementUtil.revise(rev)
+                                                .orElseThrow(() -> new TestException("Revise rev failed"));
+        System.out.println("newRev = " + newRev);
+    }
+
 }

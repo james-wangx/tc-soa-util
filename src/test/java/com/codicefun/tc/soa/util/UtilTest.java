@@ -13,7 +13,7 @@ class UtilTest {
 
     @BeforeAll
     static void init() {
-        SessionUtil.login("http://192.168.80.101:8888/tc", "james", "james", "tc-soa-util-test");
+        SessionUtil.login("http://192.168.80.102:8888/tc", "james", "james", "zh_CN", "tc-soa-util-test");
         connection = AppXSession.getConnection();
     }
 

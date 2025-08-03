@@ -1,6 +1,7 @@
 package com.codicefun.tc.soa.util;
 
 import com.codicefun.tc.soa.clientx.AppXSession;
+import com.codicefun.tc.soa.exception.SoaUtilException;
 import com.teamcenter.services.strong.core.DataManagementService;
 import com.teamcenter.services.strong.core._2006_03.DataManagement.*;
 import com.teamcenter.services.strong.core._2007_01.DataManagement.GetItemFromIdPref;
@@ -10,14 +11,15 @@ import com.teamcenter.services.strong.core._2009_10.DataManagement.GetItemFromAt
 import com.teamcenter.services.strong.core._2010_09.DataManagement.NameValueStruct1;
 import com.teamcenter.services.strong.core._2010_09.DataManagement.PropInfo;
 import com.teamcenter.services.strong.core._2010_09.DataManagement.SetPropertyResponse;
+import com.teamcenter.services.strong.core._2013_05.DataManagement.GenerateNextValuesIn;
+import com.teamcenter.services.strong.core._2013_05.DataManagement.GenerateNextValuesResponse;
 import com.teamcenter.services.strong.core._2015_07.DataManagement.CreateIn2;
 import com.teamcenter.soa.client.Connection;
 import com.teamcenter.soa.client.model.ModelObject;
 import com.teamcenter.soa.client.model.ServiceData;
-import com.teamcenter.soa.client.model.strong.Folder;
-import com.teamcenter.soa.client.model.strong.Item;
-import com.teamcenter.soa.client.model.strong.ItemRevision;
+import com.teamcenter.soa.client.model.strong.*;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -51,6 +53,12 @@ public class DataManagementUtil {
      */
     public static boolean getProperty(ModelObject mo, String propName) {
         ServiceData serviceData = dmService.getProperties(new ModelObject[]{mo}, new String[]{propName});
+
+        return !ServiceUtil.catchPartialErrors(serviceData);
+    }
+
+    public static boolean getProperties(ModelObject mo, String[] propNames) {
+        ServiceData serviceData = dmService.getProperties(new ModelObject[]{mo}, propNames);
 
         return !ServiceUtil.catchPartialErrors(serviceData);
     }
@@ -196,7 +204,7 @@ public class DataManagementUtil {
      * @return the latest item revision
      */
     public static Optional<ItemRevision> getLatestItemRevision(Item item) {
-        ModelObject[] revisions = ModelObjectUtil.getPropArrayValues(item, "revision_list").orElse(new ModelObject[0]);
+        ModelObject[] revisions = ModelObjectUtil.getPropArrayValue(item, "revision_list").orElse(new ModelObject[0]);
         if (revisions.length == 0) {
             return Optional.empty();
         }
@@ -278,6 +286,81 @@ public class DataManagementUtil {
      */
     public static boolean deleteObject(ModelObject obj) {
         ServiceData serviceData = dmService.deleteObjects(new ModelObject[]{obj});
+
+        return !ServiceUtil.catchPartialErrors(serviceData);
+    }
+
+    public static Optional<ItemRevision> getWorkingRev(Item item) {
+        ModelObject[] revisions = ModelObjectUtil.getPropArrayValue(item, "revision_list")
+                                                 .orElse(new ModelObject[0]);
+
+        for (ModelObject revision : revisions) {
+            Optional<ModelObject[]> resOpt = ModelObjectUtil.getPropArrayValue(revision, "release_status_list");
+            if (resOpt.isPresent()) {
+                return Optional.of((ItemRevision) revision);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    public static Optional<ItemRevision> getWorkingRev(ItemRevision rev) {
+        ModelObject item = ModelObjectUtil.getPropObjValue(rev, "items_tag")
+                                          .orElseThrow(() -> new SoaUtilException("items_tag is not present"));
+
+        return getWorkingRev((Item) item);
+    }
+
+    public static Optional<String> getNextRevId(ItemRevision rev) {
+        GenerateNextValuesIn[] ins = new GenerateNextValuesIn[1];
+        ins[0] = new GenerateNextValuesIn();
+        Map<String, String> additionalInputParams = new HashMap<>();
+        additionalInputParams.put("sourceObject", rev.getUid());
+        ins[0].additionalInputParams = additionalInputParams;
+        ins[0].businessObjectName = ModelObjectUtil.getPropStringValue(rev, "object_type")
+                                                   .orElseThrow(
+                                                           () -> new SoaUtilException("object_type is not present"));
+        ins[0].operationType = 2; // revise
+        Map<String, String> propertyNameWithSelectedPattern = new HashMap<>();
+        propertyNameWithSelectedPattern.put("item_revision_id", "");
+        ins[0].propertyNameWithSelectedPattern = propertyNameWithSelectedPattern;
+        GenerateNextValuesResponse response = dmService.generateNextValues(ins);
+        if (ServiceUtil.catchPartialErrors(response.data) ||
+            response.generatedValues == null ||
+            response.generatedValues.length == 0 ||
+            response.generatedValues[0] == null ||
+            response.generatedValues[0].generatedValues.isEmpty() ||
+            !response.generatedValues[0].generatedValues.containsKey("item_revision_id")) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(response.generatedValues[0].generatedValues.get("item_revision_id").nextValue);
+    }
+
+    public static Optional<ItemRevision> revise(ItemRevision rev) {
+        ReviseInfo[] infos = new ReviseInfo[1];
+        infos[0] = new ReviseInfo();
+        infos[0].clientId = "soa";
+        infos[0].baseItemRevision = rev;
+        infos[0].newRevId = getNextRevId(rev).orElseThrow(() -> new SoaUtilException("Failed in getNextId"));
+
+        ReviseResponse2 response = dmService.revise2(infos);
+        if (ServiceUtil.catchPartialErrors(response.serviceData) ||
+            response.reviseOutputMap.isEmpty() ||
+            !response.reviseOutputMap.containsKey("soa")) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(response.reviseOutputMap.get("soa").newItemRev);
+    }
+
+    public static boolean changeOwnership(ModelObject obj, User owner, Group group) {
+        ObjectOwner[] owners = new ObjectOwner[1];
+        owners[0] = new ObjectOwner();
+        owners[0].object = obj;
+        owners[0].owner = owner;
+        owners[0].group = group;
+        ServiceData serviceData = dmService.changeOwnership(owners);
 
         return !ServiceUtil.catchPartialErrors(serviceData);
     }

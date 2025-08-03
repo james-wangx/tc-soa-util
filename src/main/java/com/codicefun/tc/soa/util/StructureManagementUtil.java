@@ -5,7 +5,6 @@ import com.teamcenter.services.strong.cad.StructureManagementService;
 import com.teamcenter.services.strong.cad._2007_01.StructureManagement.*;
 import com.teamcenter.services.strong.cad._2008_06.StructureManagement.SaveBOMWindowsResponse;
 import com.teamcenter.services.strong.cad._2019_06.StructureManagement.CreateWindowsInfo3;
-import com.teamcenter.services.strong.core.DataManagementService;
 import com.teamcenter.soa.client.Connection;
 import com.teamcenter.soa.client.model.strong.*;
 import com.teamcenter.soa.exceptions.NotLoadedException;
@@ -22,7 +21,6 @@ import java.util.Optional;
 public class StructureManagementUtil {
 
     private static final Connection connection = AppXSession.getConnection();
-    private static final DataManagementService dmService = DataManagementService.getService(connection);
     private static final StructureManagementService smService = StructureManagementService.getService(connection);
 
     /**

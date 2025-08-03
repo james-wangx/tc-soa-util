@@ -6,9 +6,18 @@ import com.teamcenter.services.strong.workflow.WorkflowService;
 import com.teamcenter.services.strong.workflow._2007_06.Workflow.ReleaseStatusInput;
 import com.teamcenter.services.strong.workflow._2007_06.Workflow.ReleaseStatusOption;
 import com.teamcenter.services.strong.workflow._2007_06.Workflow.SetReleaseStatusResponse;
+import com.teamcenter.services.strong.workflow._2014_10.Workflow.CreateWkfInput;
+import com.teamcenter.services.strong.workflow._2014_10.Workflow.CreateWkfOutput;
+import com.teamcenter.services.strong.workflow._2015_07.Workflow.CreateSignoffInfo;
+import com.teamcenter.services.strong.workflow._2015_07.Workflow.CreateSignoffs;
 import com.teamcenter.soa.client.Connection;
+import com.teamcenter.soa.client.model.ModelObject;
+import com.teamcenter.soa.client.model.strong.EPMTask;
+import com.teamcenter.soa.client.model.strong.User;
 import com.teamcenter.soa.client.model.strong.WorkspaceObject;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Optional;
 
 /**
  * Workflow utility class
@@ -19,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 public class WorkflowUtil {
 
     private static final Connection connection = AppXSession.getConnection();
-    private static final WorkflowService workflowService = WorkflowService.getService(connection);
+    private static final WorkflowService wfService = WorkflowService.getService(connection);
 
     /**
      * Set release status
@@ -40,7 +49,7 @@ public class WorkflowUtil {
             inputs[0].operations[0].operation = operation;
             inputs[0].operations[0].newReleaseStatusTypeName = newStatus;
             inputs[0].operations[0].existingreleaseStatusTypeName = oldStatus;
-            SetReleaseStatusResponse response = workflowService.setReleaseStatus(inputs);
+            SetReleaseStatusResponse response = wfService.setReleaseStatus(inputs);
             return !ServiceUtil.catchPartialErrors(response.serviceData);
         } catch (ServiceException e) {
             log.error("Catch Exception: {}", e.getMessage(), e);
@@ -78,6 +87,37 @@ public class WorkflowUtil {
      */
     public static boolean deleteAllReleaseStatus(WorkspaceObject obj) {
         return deleteReleaseStatus(obj, null);
+    }
+
+    public static Optional<ModelObject> createWorkflow(String name, String desc, String template, User owner,
+                                                       ModelObject[] attachments) {
+        CreateWkfInput input = new CreateWkfInput();
+        input.processName = name;
+        input.processDescription = desc;
+        input.processTemplate = template;
+        input.workflowOwner = owner;
+        input.responsibleParty = owner;
+        input.attachments = attachments;
+        input.attachmentRelationTypes = new String[]{"Fnd0EPMTarget"};
+        try {
+            CreateWkfOutput output = wfService.createWorkflow(input);
+            if (ServiceUtil.catchPartialErrors(output.serviceData)) {
+                return Optional.empty();
+            }
+            return Optional.ofNullable(output.workflowTask);
+        } catch (ServiceException e) {
+            log.error("Catch Exception: {}", e.getMessage(), e);
+            return Optional.empty();
+        }
+    }
+
+    public static void addSignoff(EPMTask task) {
+        CreateSignoffs[] signoffs = new CreateSignoffs[1];
+        signoffs[0] = new CreateSignoffs();
+        signoffs[0].signoffInfo = new CreateSignoffInfo[1];
+        signoffs[0].task = task;
+        CreateSignoffInfo[] infos = new CreateSignoffInfo[1];
+        infos[0] = new CreateSignoffInfo();
     }
 
 }

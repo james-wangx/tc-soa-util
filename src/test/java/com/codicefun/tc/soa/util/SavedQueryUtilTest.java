@@ -19,7 +19,7 @@ class SavedQueryUtilTest {
 
     @BeforeAll
     static void init() {
-        SessionUtil.login("http://192.168.80.101:8888/tc", "00001", "00001", "tc-soa-util-test");
+        SessionUtil.login("http://192.168.80.101:8888/tc", "00001", "00001", "zh_CN", "tc-soa-util-test");
         connection = AppXSession.getConnection();
     }
 
