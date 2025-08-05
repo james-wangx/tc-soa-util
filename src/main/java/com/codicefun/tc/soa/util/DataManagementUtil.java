@@ -19,10 +19,8 @@ import com.teamcenter.soa.client.model.ModelObject;
 import com.teamcenter.soa.client.model.ServiceData;
 import com.teamcenter.soa.client.model.strong.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
 
 /**
  * Data management util
@@ -296,12 +294,30 @@ public class DataManagementUtil {
 
         for (ModelObject revision : revisions) {
             Optional<ModelObject[]> resOpt = ModelObjectUtil.getPropArrayValue(revision, "release_status_list");
-            if (resOpt.isPresent()) {
+            if (!resOpt.isPresent()) {
                 return Optional.of((ItemRevision) revision);
             }
         }
 
         return Optional.empty();
+    }
+
+    public static Optional<List<ItemRevision>> getWorkingRevList(Item item) {
+        List<ItemRevision> revList = new ArrayList<>();
+        ModelObject[] revisions = ModelObjectUtil.getPropArrayValue(item, "revision_list")
+                                                 .orElse(new ModelObject[0]);
+
+        for (ModelObject revision : revisions) {
+            Optional<ModelObject[]> resOpt = ModelObjectUtil.getPropArrayValue(revision, "release_status_list");
+            if (!resOpt.isPresent()) {
+                revList.add((ItemRevision) revision);
+            }
+        }
+
+        if (revList.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(revList);
     }
 
     public static Optional<ItemRevision> getWorkingRev(ItemRevision rev) {
