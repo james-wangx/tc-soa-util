@@ -327,6 +327,13 @@ public class DataManagementUtil {
         return getWorkingRev((Item) item);
     }
 
+    public static Optional<List<ItemRevision>> getWorkingRevList(ItemRevision rev) {
+        ModelObject item = ModelObjectUtil.getPropObjValue(rev, "items_tag")
+                                          .orElseThrow(() -> new SoaUtilException("items_tag is not present"));
+
+        return getWorkingRevList((Item) item);
+    }
+
     public static Optional<String> getNextRevId(ItemRevision rev) {
         GenerateNextValuesIn[] ins = new GenerateNextValuesIn[1];
         ins[0] = new GenerateNextValuesIn();
