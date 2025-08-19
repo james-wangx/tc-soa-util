@@ -136,22 +136,21 @@ public class StructureManagementUtil {
     /**
      * Get children bom line
      */
-    private static ExpandPSData[] getChildren(BOMLine bomLine) {
+    public static Optional<ExpandPSData[]> getChildren(BOMLine bomLine) {
         ExpandPSOneLevelInfo expendInfo = new ExpandPSOneLevelInfo();
         expendInfo.parentBomLines = new BOMLine[]{bomLine};
         expendInfo.excludeFilter = "None";
         ExpandPSOneLevelPref expandPref = new ExpandPSOneLevelPref();
         expandPref.expItemRev = false;
-        ExpandPSOneLevelOutput[] expandOutputs = smService.expandPSOneLevel(expendInfo,
-                                                                            expandPref).output;
+        ExpandPSOneLevelOutput[] expandOutputs = smService.expandPSOneLevel(expendInfo, expandPref).output;
 
         if (expandOutputs.length == 0) {
-            return null;
+            return Optional.empty();
         }
 
         ExpandPSOneLevelOutput expandOutput = expandOutputs[0];
 
-        return expandOutput.children;
+        return Optional.ofNullable(expandOutput.children);
     }
 
 }
