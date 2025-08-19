@@ -210,6 +210,12 @@ public class DataManagementUtil {
         return Optional.ofNullable((ItemRevision) revisions[revisions.length - 1]);
     }
 
+    public static Optional<ItemRevision> getLatestItemRevision(ItemRevision rev) {
+        ModelObject item = ModelObjectUtil.getPropObjValue(rev, "items_tag")
+                                          .orElseThrow(() -> new SoaUtilException("items_tag is not present"));
+        return getLatestItemRevision((Item) item);
+    }
+
     /**
      * Create folder by parent folder object and new folder name
      *
