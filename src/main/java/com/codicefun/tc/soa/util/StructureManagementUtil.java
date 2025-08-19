@@ -106,8 +106,16 @@ public class StructureManagementUtil {
         return getBOM(itemRevision).map(bom -> bom.bomLine);
     }
 
+    public static Optional<BOMLine> getBOMLine(ItemRevision itemRevision, String revRule) {
+        return getBOM(itemRevision, revRule).map(bom -> bom.bomLine);
+    }
+
     public static Optional<BOMWindow> getBOMWindow(ItemRevision itemRevision) {
         return getBOM(itemRevision).map(bom -> bom.bomWindow);
+    }
+
+    public static Optional<BOMWindow> getBOMWindow(ItemRevision itemRevision, String revRule) {
+        return getBOM(itemRevision, revRule).map(bom -> bom.bomWindow);
     }
 
     public static boolean saveBOMWindow(BOMWindow bomWindow) {
