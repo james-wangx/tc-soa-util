@@ -25,6 +25,7 @@ import java.util.Map.Entry;
 /**
  * Data management util
  */
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 public class DataManagementUtil {
 
     private static final Connection connection = AppXSession.getConnection();
@@ -216,6 +217,59 @@ public class DataManagementUtil {
         return getLatestItemRevision((Item) item);
     }
 
+    public static Optional<ItemRevision> getNotBaselineLatestReleasedRev(Item item, String statusName) {
+        Optional<List<ModelObject>> revisionListOpt = ModelObjectUtil.getPropListValue(item, "revision_list");
+        if (!revisionListOpt.isPresent()) {
+            return Optional.empty();
+        }
+
+        List<ModelObject> revisionList = revisionListOpt.get();
+        Calendar latestDate = null;
+        ItemRevision latestRev = null;
+        for (int i = revisionList.size() - 1; i >= 0; i--) {
+            ItemRevision rev = (ItemRevision) revisionList.get(i);
+            if (isBaselineRev(rev)) {
+                continue;
+            }
+
+            Optional<Calendar> dateReleasedOpt = ModelObjectUtil.getPropCalendarValue(rev, "date_released");
+            if (!dateReleasedOpt.isPresent()) {
+                continue;
+            }
+            ReleaseStatus lastReleaseStatus = (ReleaseStatus) ModelObjectUtil.getPropObjValue(rev,
+                                                                                              "last_release_status")
+                                                                             .get();
+
+            if (latestDate == null) {
+                latestDate = dateReleasedOpt.get();
+                latestRev = rev;
+                continue;
+            }
+
+            if (StringUtil.isEmpty(statusName)) {
+                if (dateReleasedOpt.get().after(latestDate)) {
+                    latestDate = dateReleasedOpt.get();
+                    latestRev = rev;
+                    continue;
+                }
+            }
+
+            String lastStatusName = ModelObjectUtil.getPropStringValue(lastReleaseStatus, "name").get();
+            if (lastStatusName.equals(statusName) && dateReleasedOpt.get().after(latestDate)) {
+                latestDate = dateReleasedOpt.get();
+                latestRev = rev;
+            }
+        }
+
+        return Optional.ofNullable(latestRev);
+    }
+
+    public static Optional<ItemRevision> getNotBaselineLatestReleasedRev(ItemRevision rev, String statusName) {
+        ModelObject item = ModelObjectUtil.getPropObjValue(rev, "items_tag")
+                                          .orElseThrow(() -> new SoaUtilException("items_tag is not present"));
+        return getNotBaselineLatestReleasedRev((Item) item, statusName);
+    }
+
     /**
      * Create folder by parent folder object and new folder name
      *
@@ -392,6 +446,11 @@ public class DataManagementUtil {
         ServiceData serviceData = dmService.changeOwnership(owners);
 
         return !ServiceUtil.catchPartialErrors(serviceData);
+    }
+
+    public static boolean isBaselineRev(ItemRevision rev) {
+        String revId = ModelObjectUtil.getPropStringValue(rev, "item_revision_id").get();
+        return revId.contains(".");
     }
 
 }

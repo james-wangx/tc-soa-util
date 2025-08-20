@@ -146,4 +146,15 @@ class DataManagementUtilTest extends UtilTest {
         System.out.println("newRev = " + newRev);
     }
 
+    @Test
+    void getNotBaselineLatestReleasedRev() {
+        Item item = (Item) DataManagementUtil.findMoByUid("Abjh2twGo0c12D")
+                                             .orElseThrow(() -> new TestException("Not found item"));
+        ItemRevision rev = DataManagementUtil.getNotBaselineLatestReleasedRev(item, null)
+                                             .orElseThrow(() -> new TestException("Not found rev"));
+        String revId = ModelObjectUtil.getPropStringValue(rev, "item_revision_id")
+                                      .orElseThrow(() -> new TestException("Not found property"));
+        System.out.println("revId = " + revId);
+    }
+
 }

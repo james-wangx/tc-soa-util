@@ -4,6 +4,7 @@ import com.teamcenter.soa.client.model.ModelObject;
 import com.teamcenter.soa.exceptions.NotLoadedException;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 
@@ -106,6 +107,20 @@ public class ModelObjectUtil {
         try {
             DataManagementUtil.getProperty(obj, propName);
             return Optional.ofNullable(obj.getPropertyObject(propName).getModelObjectValue());
+        } catch (NotLoadedException e) {
+            log.error("Get property failed: {}", e.getMessage(), e);
+            return Optional.empty();
+        }
+    }
+
+    public static Optional<Calendar> getPropCalendarValue(ModelObject obj, String propName) {
+        if (obj == null) {
+            return Optional.empty();
+        }
+
+        try {
+            DataManagementUtil.getProperty(obj, propName);
+            return Optional.ofNullable(obj.getPropertyObject(propName).getCalendarValue());
         } catch (NotLoadedException e) {
             log.error("Get property failed: {}", e.getMessage(), e);
             return Optional.empty();
