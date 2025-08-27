@@ -1,2 +1,5 @@
 # tc-soa-util
-Teamcenter SOA Utilities
+
+Teamcenter SOA Util
+
+current teamcenter version: 2412

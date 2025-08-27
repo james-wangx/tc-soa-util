@@ -12,8 +12,8 @@ $artifacts = @(
     "TcSoaStructureManagementStrong"
 )
 
-$libHome = "C:\Program Files\Siemens\TC13.3_ROOT\soa_client\java\libs"
-$version = "13000.3.0"
+$libHome = "C:\Program Files\Siemens\TC2412_ROOT\soa_client\java\libs"
+$version = "2412"
 
 foreach ($artifact in $artifacts)
 {
@@ -31,3 +31,17 @@ mvn install:install-file `
             -Dversion="$version" `
             -Dpackaging="jar" `
             -Dfile="${libHome}\fccclient.jar"
+
+mvn install:install-file `
+            -DgroupId="com.teamcenter.net" `
+            -DartifactId="tcserver" `
+            -Dversion="$version" `
+            -Dpackaging="jar" `
+            -Dfile="${libHome}\tcserverjavabinding.jar"
+
+mvn install:install-file `
+            -DgroupId="com.teamcenter.logging" `
+            -DartifactId="tclogging" `
+            -Dversion="$version" `
+            -Dpackaging="jar" `
+            -Dfile="${libHome}\TcLogging.jar"
