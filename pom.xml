@@ -6,7 +6,7 @@
 
   <groupId>com.codicefun.tc.soa</groupId>
   <artifactId>tc-soa-util</artifactId>
-  <version>13000.3.0</version>
+  <version>2412</version>
 
   <properties>
     <maven.compiler.source>8</maven.compiler.source>
@@ -79,58 +79,58 @@
       <version>${xercesImpl.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.teamcenter</groupId>
-      <artifactId>TcSoaCommon</artifactId>
+      <groupId>com.teamcenter.soa</groupId>
+      <artifactId>tc-soa-common</artifactId>
+      <version>2412</version>
+    </dependency>
+    <dependency>
+      <groupId>com.teamcenter.soa</groupId>
+      <artifactId>tc-soa-client</artifactId>
       <version>${tc.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.teamcenter</groupId>
-      <artifactId>TcSoaClient</artifactId>
+      <groupId>com.teamcenter.soa</groupId>
+      <artifactId>tc-soa-strong-model</artifactId>
       <version>${tc.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.teamcenter</groupId>
-      <artifactId>TcSoaStrongModel</artifactId>
+      <groupId>com.teamcenter.services</groupId>
+      <artifactId>tc-soa-core-strong</artifactId>
       <version>${tc.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.teamcenter</groupId>
-      <artifactId>TcSoaCoreStrong</artifactId>
+      <groupId>com.teamcenter.services</groupId>
+      <artifactId>tc-soa-query-strong</artifactId>
       <version>${tc.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.teamcenter</groupId>
-      <artifactId>TcSoaQueryStrong</artifactId>
+      <groupId>com.teamcenter.services</groupId>
+      <artifactId>tc-soa-import-export-strong</artifactId>
       <version>${tc.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.teamcenter</groupId>
-      <artifactId>TcSoaImportExportStrong</artifactId>
+      <groupId>com.teamcenter.services</groupId>
+      <artifactId>tc-soa-cad-strong</artifactId>
       <version>${tc.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.teamcenter</groupId>
-      <artifactId>TcSoaCadStrong</artifactId>
+      <groupId>com.teamcenter.services</groupId>
+      <artifactId>tc-soa-classification-strong</artifactId>
       <version>${tc.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.teamcenter</groupId>
-      <artifactId>TcSoaClassificationStrong</artifactId>
+      <groupId>com.teamcenter.services</groupId>
+      <artifactId>tc-soa-administration-strong</artifactId>
       <version>${tc.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.teamcenter</groupId>
-      <artifactId>TcSoaAdministrationStrong</artifactId>
+      <groupId>com.teamcenter.services</groupId>
+      <artifactId>tc-soa-workflow-strong</artifactId>
       <version>${tc.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.teamcenter</groupId>
-      <artifactId>TcSoaWorkflowStrong</artifactId>
-      <version>${tc.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.teamcenter</groupId>
-      <artifactId>TcSoaStructureManagementStrong</artifactId>
+      <groupId>com.teamcenter.services</groupId>
+      <artifactId>tc-soa-structure-management-strong</artifactId>
       <version>${tc.version}</version>
     </dependency>
     <dependency>
