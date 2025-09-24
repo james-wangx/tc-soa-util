@@ -17,6 +17,7 @@ import com.teamcenter.soa.client.model.strong.User;
 import com.teamcenter.soa.client.model.strong.WorkspaceObject;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 /**
@@ -98,7 +99,9 @@ public class WorkflowUtil {
         input.workflowOwner = owner;
         input.responsibleParty = owner;
         input.attachments = attachments;
-        input.attachmentRelationTypes = new String[]{"Fnd0EPMTarget"};
+        String[] attachmentRelationTypes = new String[attachments.length];
+        Arrays.fill(attachmentRelationTypes, "Fnd0EPMTarget");
+        input.attachmentRelationTypes = attachmentRelationTypes;
         try {
             CreateWkfOutput output = wfService.createWorkflow(input);
             if (ServiceUtil.catchPartialErrors(output.serviceData)) {
@@ -118,6 +121,7 @@ public class WorkflowUtil {
         signoffs[0].task = task;
         CreateSignoffInfo[] infos = new CreateSignoffInfo[1];
         infos[0] = new CreateSignoffInfo();
+        // not impl
     }
 
 }
