@@ -80,7 +80,7 @@ public class StructureManagementUtil {
         return Optional.empty();
     }
 
-    public static Optional<CreateBOMWindowsOutput> getBOM(ItemRevision itemRevision, String revRule) {
+    private static Optional<CreateBOMWindowsOutput> getBOM(ItemRevision itemRevision, String revRule) {
         CreateWindowsInfo3[] inputs = new CreateWindowsInfo3[1];
         inputs[0] = new CreateWindowsInfo3();
         getPSBOMView(itemRevision).ifPresent(psbomView -> inputs[0].bomView = psbomView);

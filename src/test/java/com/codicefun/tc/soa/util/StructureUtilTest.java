@@ -2,6 +2,7 @@ package com.codicefun.tc.soa.util;
 
 import com.codicefun.tc.soa.exception.TestException;
 import com.teamcenter.services.strong.cad._2007_01.StructureManagement.CreateBOMWindowsOutput;
+import com.teamcenter.soa.client.model.ModelObject;
 import com.teamcenter.soa.client.model.strong.BOMLine;
 import com.teamcenter.soa.client.model.strong.ItemRevision;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,20 @@ class StructureUtilTest extends UtilTest {
         boolean isSaved = StructureManagementUtil.saveBOMWindow(bom.bomWindow);
         assertNotNull(childLine);
         assertTrue(isSaved);
+    }
+
+    @Test
+    void createPSBVR() {
+        ModelObject mo = DataManagementUtil.findMoByUid("QECAAAStZXeAPB")
+                                           .orElseThrow(() -> new TestException("Not found item revision"));
+        assertTrue(StructureUtil.createPSBVR((ItemRevision) mo).isPresent());
+    }
+
+    @Test
+    void getPSVT() {
+        ModelObject mo = DataManagementUtil.findMoByUid("AtOAAASFZXeAPB")
+                                           .orElseThrow(() -> new TestException("Not found item revision"));
+        assertTrue(StructureUtil.getPSVT((ItemRevision) mo, "view").isPresent());
     }
 
 }
