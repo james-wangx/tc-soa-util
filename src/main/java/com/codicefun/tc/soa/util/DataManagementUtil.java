@@ -181,6 +181,7 @@ public class DataManagementUtil {
         PropInfo[] infos = new PropInfo[1];
         infos[0] = new PropInfo();
         infos[0].object = obj;
+        propMap.entrySet().removeIf(entry -> entry.getValue() == null);
         NameValueStruct1[] structs = new NameValueStruct1[propMap.size()];
         int i = 0;
         for (Entry<String, String> entry : propMap.entrySet()) {
