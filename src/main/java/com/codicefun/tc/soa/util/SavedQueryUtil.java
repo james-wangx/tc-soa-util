@@ -6,7 +6,6 @@ import com.teamcenter.schemas.soa._2006_03.exceptions.ServiceException;
 import com.teamcenter.services.strong.query.SavedQueryService;
 import com.teamcenter.services.strong.query._2006_03.SavedQuery.GetSavedQueriesResponse;
 import com.teamcenter.services.strong.query._2006_03.SavedQuery.SavedQueryObject;
-import com.teamcenter.services.strong.query._2007_09.SavedQuery.QueryResults;
 import com.teamcenter.services.strong.query._2007_09.SavedQuery.SavedQueriesResponse;
 import com.teamcenter.services.strong.query._2008_06.SavedQuery.QueryInput;
 import com.teamcenter.soa.client.Connection;
@@ -41,7 +40,7 @@ public class SavedQueryUtil {
         }
     }
 
-    public static Optional<QueryResults[]> queryAll(String name, String[] entries, String[] values) {
+    public static Optional<ModelObject[]> queryAll(String name, String[] entries, String[] values) {
         try {
             ImanQuery query = getSavedQueryByName(name).orElseThrow(
                     () -> new SoaUtilException("Not found saved query by name: " + name));
@@ -58,7 +57,12 @@ public class SavedQueryUtil {
                 return Optional.empty();
             }
 
-            return Optional.of(response.arrayOfResults);
+            String[] objectUIDS = response.arrayOfResults[0].objectUIDS;
+            if (objectUIDS == null || objectUIDS.length == 0) {
+                return Optional.empty();
+            }
+
+            return DataManagementUtil.findMosByUids(objectUIDS);
         } catch (SoaUtilException e) {
             log.error(e.getMessage(), e);
             return Optional.empty();
@@ -67,14 +71,9 @@ public class SavedQueryUtil {
 
     public static Optional<ModelObject> queryOneObject(String name, String[] entries, String[] values) {
         try {
-            QueryResults[] results = queryAll(name, entries, values).orElseThrow(
+            ModelObject[] results = queryAll(name, entries, values).orElseThrow(
                     () -> new SoaUtilException("Not found any result"));
-            String uid = results[0].objectUIDS[0];
-            ModelObject obj = DataManagementUtil.findMoByUid(uid)
-                                                .orElseThrow(() -> new SoaUtilException(
-                                                        "Not found model object by uid: " + uid));
-
-            return Optional.ofNullable(obj);
+            return Optional.ofNullable(results[0]);
         } catch (SoaUtilException e) {
             log.error(e.getMessage(), e);
             return Optional.empty();
