@@ -195,20 +195,30 @@ public class DataManagementUtil {
      * Set properties
      *
      * @param obj     the model object
-     * @param propMap the property map
+     * @param propMap the property map, key is property name, value is property value.
+     *                <p>
+     *                value type can be String or String[].
      * @return true if successful, otherwise false
      */
-    public static boolean setProperties(ModelObject obj, Map<String, String> propMap) {
+    public static boolean setProperties(ModelObject obj, Map<String, Object> propMap) {
         PropInfo[] infos = new PropInfo[1];
         infos[0] = new PropInfo();
         infos[0].object = obj;
         propMap.entrySet().removeIf(entry -> entry.getValue() == null);
         NameValueStruct1[] structs = new NameValueStruct1[propMap.size()];
         int i = 0;
-        for (Entry<String, String> entry : propMap.entrySet()) {
+        for (Entry<String, Object> entry : propMap.entrySet()) {
             NameValueStruct1 struct = new NameValueStruct1();
             struct.name = entry.getKey();
-            struct.values = new String[]{entry.getValue()};
+            if (entry.getValue() instanceof String) {
+                struct.values = new String[]{(String) entry.getValue()};
+            } else if (entry.getValue() instanceof String[]) {
+                struct.values = (String[]) entry.getValue();
+            } else {
+                throw new SoaUtilException(
+                        "Unsupported property value type: " + entry.getValue().getClass().getName() + ", key: " +
+                        entry.getKey() + ", only support String and String[]");
+            }
             structs[i++] = struct;
         }
         infos[0].vecNameVal = structs;

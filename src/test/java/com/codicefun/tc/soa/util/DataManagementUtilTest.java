@@ -76,9 +76,20 @@ class DataManagementUtilTest extends UtilTest {
         ItemRevision itemRevision = (ItemRevision) DataManagementUtil.findMoByUid("RYjdNMcao0c12D")
                                                                      .orElseThrow(() -> new TestException(
                                                                              "Not found item revision"));
-        Map<String, String> propMap = new HashMap<>();
+        Map<String, Object> propMap = new HashMap<>();
         propMap.put("object_name", "setPropertiesTestSuccess");
         propMap.put("object_desc", "test description");
+        boolean result = DataManagementUtil.setProperties(itemRevision, propMap);
+        assertTrue(result);
+    }
+
+    @Test
+    void setPropertiesLOV() {
+        ItemRevision itemRevision = (ItemRevision) DataManagementUtil.findMoByUid("wYEAAA3XZXeAPB")
+                                                                     .orElseThrow(() -> new TestException(
+                                                                             "Not found item revision"));
+        Map<String, Object> propMap = new HashMap<>();
+        propMap.put("z8_test", new String[]{"a", "b"});
         boolean result = DataManagementUtil.setProperties(itemRevision, propMap);
         assertTrue(result);
     }
