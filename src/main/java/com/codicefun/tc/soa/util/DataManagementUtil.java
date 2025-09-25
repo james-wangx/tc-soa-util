@@ -79,6 +79,27 @@ public class DataManagementUtil {
     }
 
     /**
+     * Find model objects by uids
+     *
+     * @param uids target model objects' uids
+     * @return the result model objects
+     */
+    public static Optional<ModelObject[]> findMosByUids(String[] uids) {
+        ServiceData serviceData = dmService.loadObjects(uids);
+
+        if (ServiceUtil.catchPartialErrors(serviceData) || serviceData.sizeOfPlainObjects() == 0) {
+            return Optional.empty();
+        }
+
+        ModelObject[] mos = new ModelObject[serviceData.sizeOfPlainObjects()];
+        for (int i = 0; i < serviceData.sizeOfPlainObjects(); i++) {
+            mos[i] = serviceData.getPlainObject(i);
+        }
+
+        return Optional.of(mos);
+    }
+
+    /**
      * Get naming rules
      *
      * @param typeName the type name

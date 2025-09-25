@@ -1,6 +1,7 @@
 package com.codicefun.tc.soa.util;
 
 import com.codicefun.tc.soa.exception.TestException;
+import com.teamcenter.soa.client.model.ModelObject;
 import com.teamcenter.soa.client.model.strong.Folder;
 import com.teamcenter.soa.client.model.strong.Item;
 import com.teamcenter.soa.client.model.strong.ItemRevision;
@@ -99,6 +100,18 @@ class DataManagementUtilTest extends UtilTest {
 
             System.out.println("desc = " + desc);
             connection.getClientDataModel().removeAllObjects();
+        }
+    }
+
+    @Test
+    void findMosByUids() {
+        ModelObject[] mos = DataManagementUtil.findMosByUids(
+                                                      new String[]{"QELAAA3XZXeAPB", "QwIAAA3XZXeAPB"})
+                                              .orElseThrow(
+                                                      () -> new TestException("Not found mos by uids"));
+        assertEquals(2, mos.length);
+        for (ModelObject mo : mos) {
+            assertNotNull(mo);
         }
     }
 
