@@ -53,7 +53,8 @@ class DataManagementUtilTest extends UtilTest {
 
     @Test
     void createItem() {
-        Optional<Item> result = DataManagementUtil.createItem(null, null, null, null, null);
+        Folder homeFolder = SessionUtil.getHomeFolder().get();
+        Optional<Item> result = DataManagementUtil.createItem("Z8_Document", null, "Test", null, homeFolder);
         assertTrue(result.isPresent());
     }
 
@@ -137,6 +138,12 @@ class DataManagementUtilTest extends UtilTest {
 
     @Test
     void createObject() {
+        Folder homeFolder = SessionUtil.getHomeFolder().get();
+        Map<String, String[]> propMap = new HashMap<>();
+        // propMap.put("item_id", new String[] {"000144"});
+        propMap.put("item_revision_id", new String[]{"A"});
+        propMap.put("object_name", new String[]{"Test"});
+        DataManagementUtil.createObject(homeFolder, "Z8_DocumentRevision", propMap);
     }
 
     @Test

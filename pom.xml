@@ -81,7 +81,7 @@
     <dependency>
       <groupId>com.teamcenter.soa</groupId>
       <artifactId>tc-soa-common</artifactId>
-      <version>2412</version>
+      <version>${tc.version}</version>
     </dependency>
     <dependency>
       <groupId>com.teamcenter.soa</groupId>
