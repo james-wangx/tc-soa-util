@@ -6,7 +6,7 @@
 
   <groupId>com.codicefun.tc.soa</groupId>
   <artifactId>tc-soa-util</artifactId>
-  <version>2412</version>
+  <version>13000.3.0</version>
 
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
@@ -20,7 +20,7 @@
     <log4j.version>2.14.0</log4j.version>
     <httpclient.version>4.5.13</httpclient.version>
     <xercesImpl.version>2.12.1</xercesImpl.version>
-    <tc.version>2412</tc.version>
+    <tc.version>13000.3.0</tc.version>
   </properties>
 
   <dependencies>
@@ -56,6 +56,16 @@
       <groupId>com.sun.xml.bind</groupId>
       <artifactId>jaxb-impl</artifactId>
       <version>2.3.3</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>2.15.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.15.2</version>
     </dependency>
 
     <dependency>
@@ -143,11 +153,11 @@
       <artifactId>tcserver</artifactId>
       <version>${tc.version}</version>
     </dependency>
-    <dependency>
-      <groupId>com.teamcenter.logging</groupId>
-      <artifactId>tclogging</artifactId>
-      <version>${tc.version}</version>
-    </dependency>
+    <!-- <dependency> -->
+    <!--   <groupId>com.teamcenter.logging</groupId> -->
+    <!--   <artifactId>tclogging</artifactId> -->
+    <!--   <version>${tc.version}</version> -->
+    <!-- </dependency> -->
   </dependencies>
 
 </project>

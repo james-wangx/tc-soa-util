@@ -33,9 +33,9 @@ public class PropDescriptorUtil {
             }
             PropDescOutput2 output = response.inputTypeNameToPropDescOutput.get(typeName)[0];
             Fnd0ListOfValuesDynamic dlov = (Fnd0ListOfValuesDynamic) output.propertyDesc.lov;
-            DataManagementUtil.getProperties(dlov,
-                                             new String[]{"fnd0query_clause", "fnd0filter_attributes", "fnd0lov_desc",
-                                                          "fnd0query_type", "fnd0lov_value"});
+            // TcUtil.getProperties(dlov,
+            //                                  new String[]{"fnd0query_clause", "fnd0filter_attributes", "fnd0lov_desc",
+            //                                               "fnd0query_type", "fnd0lov_value"});
             String[] queryClause = dlov.get_fnd0query_clause();
             String[] filterAttributes = dlov.get_fnd0filter_attributes();
             String fnd0lovValue = dlov.get_fnd0lov_value();

@@ -21,7 +21,6 @@ import java.util.Optional;
 public class SessionUtil {
 
     private static SessionService sessionService;
-
     private static GetTCSessionInfoResponse sessionInfoResponse;
 
     public static boolean login(String host, String username, String password, String locale,
