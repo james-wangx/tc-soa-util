@@ -31,6 +31,7 @@ public class PropDescriptorUtil {
                 response.inputTypeNameToPropDescOutput.get(typeName).length == 0) {
                 return;
             }
+
             PropDescOutput2 output = response.inputTypeNameToPropDescOutput.get(typeName)[0];
             Fnd0ListOfValuesDynamic dlov = (Fnd0ListOfValuesDynamic) output.propertyDesc.lov;
             // TcUtil.getProperties(dlov,
