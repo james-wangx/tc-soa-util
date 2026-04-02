@@ -33,15 +33,15 @@ class TcUtilTest extends UtilTest {
 
     @Test
     void test() {
-        String queryName = "Item ID";
-        String[] queryEntries = new String[]{"零组件 ID"};
-        String[] queryValues = new String[]{"D0057648"};
+        String queryName = "Item...";
+        String[] queryEntries = new String[]{"名称", "类型"};
+        String[] queryValues = new String[]{"Test", "CPGC-产品零部件"};
         // log.info("Execute query: {}, entries: {}, values: {}", queryName, queryEntries, queryValues);
         Optional<ModelObject> resOpt = tcUtil.queryOneObject(queryName, queryEntries, queryValues);
         if (resOpt.isPresent()) {
-            System.out.println("Found object for projectNo D0057648: " + resOpt.get().getUid());
+            System.out.println("Found object for object name Test: " + resOpt.get().getUid());
         } else {
-            System.out.println("No object found for projectNo D0057648");
+            System.out.println("No object found for object name Test");
         }
     }
 

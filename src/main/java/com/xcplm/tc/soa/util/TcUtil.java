@@ -19,6 +19,7 @@ import com.teamcenter.services.strong.core._2007_01.DataManagement.GetItemFromId
 import com.teamcenter.services.strong.core._2008_06.DataManagement.*;
 import com.teamcenter.services.strong.core._2009_10.DataManagement.GetItemFromAttributeInfo;
 import com.teamcenter.services.strong.core._2009_10.DataManagement.GetItemFromAttributeResponse;
+import com.teamcenter.services.strong.core._2010_09.DataManagement;
 import com.teamcenter.services.strong.core._2010_09.DataManagement.NameValueStruct1;
 import com.teamcenter.services.strong.core._2010_09.DataManagement.PropInfo;
 import com.teamcenter.services.strong.core._2010_09.DataManagement.SetPropertyResponse;
@@ -47,6 +48,7 @@ import com.teamcenter.services.strong.workflow._2015_07.Workflow.CreateSignoffIn
 import com.teamcenter.services.strong.workflow._2015_07.Workflow.CreateSignoffs;
 import com.teamcenter.soa.client.Connection;
 import com.teamcenter.soa.client.model.ModelObject;
+import com.teamcenter.soa.client.model.Property;
 import com.teamcenter.soa.client.model.ServiceData;
 import com.teamcenter.soa.client.model.strong.*;
 import com.teamcenter.soa.exceptions.NotLoadedException;
@@ -1264,6 +1266,55 @@ public class TcUtil {
         return !ServiceUtil.catchPartialErrors(response.data);
     }
 
+    /**
+     * Export bom to excel
+     *
+     * @param inputData The input data to export
+     * @return Excel file path
+     */
+    private Optional<String> exportBom2Excel(ExportToApplicationInputData2 inputData) {
+        try {
+            ExportToApplicationResponse1 response = fieService.exportToApplication(
+                    new ExportToApplicationInputData2[]{inputData});
+            // Catch errors but continue
+            ServiceUtil.catchPartialErrors(response.serviceData);
+            if (response.transientFileReadTickets == null || response.transientFileReadTickets.length == 0) {
+                return Optional.empty();
+            }
+
+            String ticket = response.transientFileReadTickets[0];
+            return Optional.of(TRANSIENT_DIRECTORY + File.separator + ticket.split(TRANSIENT_SEPARATOR)[1]);
+        } catch (ServiceException e) {
+            log.error("Catch ServiceException: {}", e.getMessage(), e);
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Get bom by item revision and rev rule
+     *
+     * @param itemRevision the item revision
+     * @param revRule      the rev rule
+     * @return the bom, if failed to get, return an empty Optional
+     */
+    private Optional<CreateBOMWindowsOutput> getBOM(ItemRevision itemRevision, String revRule) {
+        CreateWindowsInfo3[] inputs = new CreateWindowsInfo3[1];
+        inputs[0] = new CreateWindowsInfo3();
+        getPSBOMView(itemRevision).ifPresent(psbomView -> inputs[0].bomView = psbomView);
+        inputs[0].itemRev = itemRevision;
+        RevisionRuleConfigInfo revRuleConfigInfo = new RevisionRuleConfigInfo();
+        revRuleConfigInfo.revRule = getRevisionRule(revRule).orElseThrow(
+                () -> new SoaUtilException("Not found revision rule by name: " + revRule));
+        inputs[0].revRuleConfigInfo = revRuleConfigInfo;
+        CreateBOMWindowsResponse response = smService.createOrReConfigureBOMWindows(inputs);
+        if (ServiceUtil.catchPartialErrors(response.serviceData) ||
+            response.output == null ||
+            response.output.length == 0) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(response.output[0]);
+    }
 
     /**
      * Set release status
@@ -1292,51 +1343,30 @@ public class TcUtil {
         }
     }
 
-
-    private Optional<CreateBOMWindowsOutput> getBOM(ItemRevision itemRevision, String revRule) {
-        CreateWindowsInfo3[] inputs = new CreateWindowsInfo3[1];
-        inputs[0] = new CreateWindowsInfo3();
-        getPSBOMView(itemRevision).ifPresent(psbomView -> inputs[0].bomView = psbomView);
-        inputs[0].itemRev = itemRevision;
-        RevisionRuleConfigInfo revRuleConfigInfo = new RevisionRuleConfigInfo();
-        revRuleConfigInfo.revRule = getRevisionRule(revRule).orElseThrow(
-                () -> new SoaUtilException("Not found revision rule by name: " + revRule));
-        inputs[0].revRuleConfigInfo = revRuleConfigInfo;
-        CreateBOMWindowsResponse response = smService.createOrReConfigureBOMWindows(inputs);
-        if (ServiceUtil.catchPartialErrors(response.serviceData) ||
-            response.output == null ||
-            response.output.length == 0) {
-            return Optional.empty();
+    public void setBOMWindowPack(BOMWindow window) throws NotLoadedException {
+        log.info("setBOMWindowPack start");
+        String propName = "is_packed_by_default";
+        dmService.getProperties(new ModelObject[]{window}, new String[]{propName});
+        boolean bolPack = window.get_is_packed_by_default();
+        System.out.println(propName + "=" + bolPack);
+        if (!bolPack) {
+            String[] as = {"ENABLE_PSE_BULLETIN_BOARD"};
+            DataManagement.PropInfo[] apropinfo = new DataManagement.PropInfo[1];
+            apropinfo[0] = new DataManagement.PropInfo();
+            apropinfo[0].object = window;
+            DataManagement.NameValueStruct1[] vecNameVal = new DataManagement.NameValueStruct1[1];
+            vecNameVal[0] = new DataManagement.NameValueStruct1();
+            vecNameVal[0].name = propName;
+            vecNameVal[0].values = new String[]{Property.toBooleanString(true)};
+            apropinfo[0].vecNameVal = vecNameVal;
+            dmService.setProperties(apropinfo, as);
+            DataManagement.SetPropertyResponse setpropertyresponse = dmService.setProperties(apropinfo, as);
+            dmService.refreshObjects(new ModelObject[]{window});
         }
-
-        return Optional.ofNullable(response.output[0]);
+        bolPack = window.get_is_packed_by_default();
+        log.info("{}.now={}", propName, bolPack);
+        log.info("setBOMWindowPack end");
     }
-
-
-    /**
-     * Export bom to excel
-     *
-     * @param inputData The input data to export
-     * @return Excel file path
-     */
-    private Optional<String> exportBom2Excel(ExportToApplicationInputData2 inputData) {
-        try {
-            ExportToApplicationResponse1 response = fieService.exportToApplication(
-                    new ExportToApplicationInputData2[]{inputData});
-            // Catch errors but continue
-            ServiceUtil.catchPartialErrors(response.serviceData);
-            if (response.transientFileReadTickets == null || response.transientFileReadTickets.length == 0) {
-                return Optional.empty();
-            }
-
-            String ticket = response.transientFileReadTickets[0];
-            return Optional.of(TRANSIENT_DIRECTORY + File.separator + ticket.split(TRANSIENT_SEPARATOR)[1]);
-        } catch (ServiceException e) {
-            log.error("Catch ServiceException: {}", e.getMessage(), e);
-            return Optional.empty();
-        }
-    }
-
 
     // public Optional<File> downloadFile(Dataset dataset) {
     //     ModelObject[] refs = getPropArrayValue(dataset, "ref_list").orElseThrow(
