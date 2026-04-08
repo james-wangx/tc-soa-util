@@ -785,6 +785,27 @@ public class TcUtil {
     }
 
     /**
+     * Get property double value
+     *
+     * @param obj      the model object
+     * @param propName the property name
+     * @return the double value, if the property is not present or failed to get, return an empty Optional
+     */
+    public Optional<Double> getPropDoubleValue(ModelObject obj, String propName) {
+        if (obj == null) {
+            return Optional.empty();
+        }
+
+        try {
+            getProperty(obj, propName);
+            return Optional.of(obj.getPropertyObject(propName).getDoubleValue());
+        } catch (NotLoadedException e) {
+            log.error("Get property failed: {}", e.getMessage(), e);
+            return Optional.empty();
+        }
+    }
+
+    /**
      * Get properties from tc
      *
      * @param mo        the model object
