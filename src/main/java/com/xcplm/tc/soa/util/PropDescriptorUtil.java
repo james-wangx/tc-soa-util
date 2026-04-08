@@ -8,13 +8,13 @@ import com.teamcenter.services.strong.core._2011_06.PropDescriptor.PropDescOutpu
 import com.teamcenter.soa.client.Connection;
 import com.teamcenter.soa.client.model.strong.Fnd0ListOfValuesDynamic;
 import com.teamcenter.soa.exceptions.NotLoadedException;
-import com.xcplm.tc.soa.clientx.AppXSession;
+import com.xcplm.tc.soa.clientx.AppXSharedSession;
 
 import java.util.Arrays;
 
 public class PropDescriptorUtil {
 
-    private static final Connection connection = AppXSession.getConnection();
+    private static final Connection connection = AppXSharedSession.getConnection();
     private static final PropDescriptorService pdService = PropDescriptorService.getService(connection);
 
     public static void getAttachedPropDesc(String typeName, String propName) {
@@ -25,12 +25,12 @@ public class PropDescriptorUtil {
 
         try {
             AttachedPropDescsResponse response = pdService.getAttachedPropDescs2(infos);
-            if (ServiceUtil.catchPartialErrors(response.serviceData) ||
-                response.inputTypeNameToPropDescOutput == null ||
-                response.inputTypeNameToPropDescOutput.get(typeName) == null ||
-                response.inputTypeNameToPropDescOutput.get(typeName).length == 0) {
-                return;
-            }
+            // if (ServiceUtil.catchPartialErrors(response.serviceData) ||
+            //     response.inputTypeNameToPropDescOutput == null ||
+            //     response.inputTypeNameToPropDescOutput.get(typeName) == null ||
+            //     response.inputTypeNameToPropDescOutput.get(typeName).length == 0) {
+            //     return;
+            // }
 
             PropDescOutput2 output = response.inputTypeNameToPropDescOutput.get(typeName)[0];
             Fnd0ListOfValuesDynamic dlov = (Fnd0ListOfValuesDynamic) output.propertyDesc.lov;

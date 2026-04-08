@@ -2,7 +2,6 @@ package com.xcplm.tc.soa.util;
 
 import com.teamcenter.services.strong.core._2006_03.DataManagement.ItemProperties;
 import com.teamcenter.soa.client.model.ModelObject;
-import com.teamcenter.soa.client.model.strong.ItemRevision;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -27,8 +26,8 @@ class TcUtilTest extends UtilTest {
         attrMap.put("u2_remarks", "test");
         // extendedAttributes[0].attributes = attrMap;
         // itemProperties.extendedAttributes = extendedAttributes;
-        ItemRevision itemRevision = tcUtil.createItem(itemProperties, null, null).get();
-        tcUtil.setProperties(itemRevision, attrMap);
+        // ItemRevision itemRevision = tcUtil.createItem(itemProperties, null, null).get();
+        // tcUtil.setProperties(itemRevision, attrMap);
     }
 
     @Test

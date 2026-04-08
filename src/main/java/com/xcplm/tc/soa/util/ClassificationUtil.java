@@ -7,7 +7,7 @@ import com.teamcenter.soa.client.Connection;
 import com.teamcenter.soa.client.model.ModelObject;
 import com.teamcenter.soa.client.model.strong.ItemRevision;
 import com.teamcenter.soa.client.model.strong.WorkspaceObject;
-import com.xcplm.tc.soa.clientx.AppXSession;
+import com.xcplm.tc.soa.clientx.AppXSharedSession;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,7 +29,7 @@ public class ClassificationUtil {
 
     private static final Logger logger = LogManager.getLogger(ClassificationUtil.class);
 
-    private static final Connection connection = AppXSession.getConnection();
+    private static final Connection connection = AppXSharedSession.getConnection();
     private static final ClassificationService clsService = ClassificationService.getService(connection);
 
     /**

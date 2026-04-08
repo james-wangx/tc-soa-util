@@ -2,25 +2,21 @@ package com.xcplm.tc.soa.clientx;
 
 import com.teamcenter.soa.SoaConstants;
 import com.teamcenter.soa.client.Connection;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
+import lombok.Getter;
 
 /**
- * The Session class manages the connection to the SOA Framework and provides access to the SOA services and model manager.
- * <p>
- * The Session class is responsible for creating the Connection object, which is the main access point to the SOA Framework.
- * It also allows client applications to add implementations of the ExceptionHandler, PartialErrorListener, ChangeListener,
- * and DeleteListeners.
+ * This class is used to create and hold a single instance of the Connection object that is shared throughout the
+ * application.
  */
-@Data
-@Slf4j
-public class AppXSession {
+@SuppressWarnings("unused")
+public class AppXSharedSession {
 
     /**
-     * The Connection object is the main access point to the SOA Framework, it manages the connection to the server and
-     * provides access to the SOA services and model manager.
+     * Single instance of the Connection object that is shared throughout the application.
+     * This Connection object is needed whenever a Service stub is instantiated.
      */
-    private Connection connection;
+    @Getter
+    private static Connection connection;
 
     /**
      * Create an instance of the Session with a connection to the specified server.
@@ -30,7 +26,7 @@ public class AppXSession {
      * @param host Address of the host to connect to, http://serverName:port/tc
      */
     @SuppressWarnings("JavadocLinkAsPlainText")
-    public AppXSession(String host) {
+    public AppXSharedSession(String host) {
         // Create an instance of the CredentialManager, this is used by the SOA Framework to get the user's credentials
         // when challenged by the server (session timeout on the web tier).
         AppXCredentialManager credentialManager = new AppXCredentialManager();

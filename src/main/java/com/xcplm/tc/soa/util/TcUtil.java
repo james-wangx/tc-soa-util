@@ -14,8 +14,12 @@ import com.teamcenter.services.strong.cad._2007_01.StructureManagement.*;
 import com.teamcenter.services.strong.cad._2008_06.StructureManagement.SaveBOMWindowsResponse;
 import com.teamcenter.services.strong.cad._2019_06.StructureManagement.CreateWindowsInfo3;
 import com.teamcenter.services.strong.core.DataManagementService;
+import com.teamcenter.services.strong.core.SessionService;
 import com.teamcenter.services.strong.core._2006_03.DataManagement.*;
+import com.teamcenter.services.strong.core._2006_03.Session;
 import com.teamcenter.services.strong.core._2007_01.DataManagement.GetItemFromIdPref;
+import com.teamcenter.services.strong.core._2007_01.Session.GetTCSessionInfoResponse;
+import com.teamcenter.services.strong.core._2007_12.Session.StateNameValue;
 import com.teamcenter.services.strong.core._2008_06.DataManagement.*;
 import com.teamcenter.services.strong.core._2009_10.DataManagement.GetItemFromAttributeInfo;
 import com.teamcenter.services.strong.core._2009_10.DataManagement.GetItemFromAttributeResponse;
@@ -65,18 +69,58 @@ import java.util.Map.Entry;
 public class TcUtil {
 
     // private final FileManagementUtility fmUtil;
+
+    /**
+     * Data Management Service
+     */
     private final DataManagementService dmService;
-    private final WorkflowService wfService;
-    private final StructureManagementService smService;
-    private final SavedQueryService sqService;
-    private final PreferenceManagementService pmService;
+
+    /**
+     * File Import Export Service
+     */
     private final FileImportExportService fieService;
-    private final StructureService structureService;
 
     /**
      * Internal Structure Service
      */
     private final com.teamcenter.services.internal.strong.structuremanagement.StructureService isService;
+
+    /**
+     * Preference Management Service
+     */
+    private final PreferenceManagementService pmService;
+
+    /**
+     * Session Service
+     */
+    private final SessionService sessionService;
+
+    /**
+     * Structure Management Service
+     */
+    private final StructureManagementService smService;
+
+    /**
+     * Saved Query Service
+     */
+    private final SavedQueryService sqService;
+
+    /**
+     * Structure Service
+     */
+    private final StructureService structureService;
+
+    /**
+     * Workflow Service
+     */
+    private final WorkflowService wfService;
+
+    /**
+     * Session information response, used to get current session info without calling getTCSessionInfo repeatedly
+     */
+    private GetTCSessionInfoResponse sessionInfoResponse;
+
+
     /**
      * Transient file directory, read from TC Preference: "Transient_Volume_RootDir"
      */
@@ -95,14 +139,16 @@ public class TcUtil {
     public TcUtil(Connection connection) {
         // this.fmUtil = new FileManagementUtility(connection);
         this.dmService = DataManagementService.getService(connection);
-        this.wfService = WorkflowService.getService(connection);
-        this.smService = StructureManagementService.getService(connection);
-        this.sqService = SavedQueryService.getService(connection);
-        this.pmService = PreferenceManagementService.getService(connection);
         this.fieService = FileImportExportService.getService(connection);
-        this.structureService = StructureService.getService(connection);
         this.isService = com.teamcenter.services.internal.strong.structuremanagement.StructureService.getService(
                 connection);
+        this.pmService = PreferenceManagementService.getService(connection);
+        this.sessionService = SessionService.getService(connection);
+        this.smService = StructureManagementService.getService(connection);
+        this.sqService = SavedQueryService.getService(connection);
+        this.structureService = StructureService.getService(connection);
+        this.wfService = WorkflowService.getService(connection);
+
     }
 
     /**
@@ -120,7 +166,7 @@ public class TcUtil {
         addParams[0].toBeAdded[0] = new AddInformation();
         addParams[0].toBeAdded[0].itemRev = itemRevision;
         AddResponse response = structureService.add(addParams);
-        if (ServiceUtil.catchPartialErrors(response.serviceData) ||
+        if (catchPartialErrors(response.serviceData) ||
             response.addedLines == null ||
             response.addedLines.length == 0) {
             return Optional.empty();
@@ -171,7 +217,7 @@ public class TcUtil {
         owners[0].group = group;
         ServiceData serviceData = dmService.changeOwnership(owners);
 
-        return !ServiceUtil.catchPartialErrors(serviceData);
+        return !catchPartialErrors(serviceData);
     }
 
     /**
@@ -189,7 +235,7 @@ public class TcUtil {
         inputs[0].relationType = "contents";
         CreateRelationsResponse response = dmService.createRelations(inputs);
 
-        return !ServiceUtil.catchPartialErrors(response.serviceData);
+        return !catchPartialErrors(response.serviceData);
     }
 
     /**
@@ -205,7 +251,7 @@ public class TcUtil {
         inputs[0].name = name;
         CreateFoldersResponse response = dmService.createFolders(inputs, parent, "");
 
-        if (ServiceUtil.catchPartialErrors(response.serviceData) || response.output == null ||
+        if (catchPartialErrors(response.serviceData) || response.output == null ||
             response.output.length == 0) {
             return Optional.empty();
         }
@@ -214,23 +260,23 @@ public class TcUtil {
     }
 
     /**
-     * Creates an item with the specified properties and adds it to the given container.
+     * Create an item with the specified properties and relate it to the given container.
      *
-     * @param itemProperties A list of properties to create new Item objects
-     * @param container      The container object to which all the items will be related to via the input relation type, optional
-     * @param relationType   The relation type that will be used to relate the newly created Items to the container, optional.
+     * @param itemProperties The properties to create the new Item object
+     * @param container      The container object to which the item will be related, optional
+     * @param relationType   The relation type that will be used to relate the newly created Item to the container, optional
      * @return an Optional containing the created item if successful, otherwise an empty Optional
      */
-    public Optional<ItemRevision> createItem(ItemProperties itemProperties, ModelObject container,
-                                             String relationType) {
+    public Optional<Item> createItem(ItemProperties itemProperties, ModelObject container,
+                                     String relationType) {
         CreateItemsResponse response = dmService.createItems(new ItemProperties[]{itemProperties}, container,
                                                              relationType);
-        if (ServiceUtil.catchPartialErrors(response.serviceData) || response.output == null ||
+        if (catchPartialErrors(response.serviceData) || response.output == null ||
             response.output.length == 0) {
             return Optional.empty();
         }
 
-        return Optional.ofNullable(response.output[0].itemRev);
+        return Optional.ofNullable(response.output[0].item);
     }
 
     /**
@@ -248,7 +294,7 @@ public class TcUtil {
         inputs[0].createData.boName = type;
         inputs[0].createData.propertyNameValues = propMap;
         CreateResponse response = dmService.createRelateAndSubmitObjects2(inputs);
-        if (ServiceUtil.catchPartialErrors(response.serviceData) || response.output == null ||
+        if (catchPartialErrors(response.serviceData) || response.output == null ||
             response.output.length == 0 || response.output[0].objects == null ||
             response.output[0].objects.length == 0) {
             return Optional.empty();
@@ -288,7 +334,7 @@ public class TcUtil {
         inputs[0].isPrecise = isPrevise;
 
         CreateOrSaveAsPSBOMViewRevisionResponse response = isService.createOrSavePSBOMViewRevision(inputs);
-        if (ServiceUtil.catchPartialErrors(response.serviceData) ||
+        if (catchPartialErrors(response.serviceData) ||
             response.psBVROutputs == null ||
             response.psBVROutputs.length == 0) {
             return Optional.empty();
@@ -321,7 +367,7 @@ public class TcUtil {
         input.attachmentRelationTypes = attachmentRelationTypes;
         try {
             CreateWkfOutput output = wfService.createWorkflow(input);
-            if (ServiceUtil.catchPartialErrors(output.serviceData)) {
+            if (catchPartialErrors(output.serviceData)) {
                 return Optional.empty();
             }
             return Optional.ofNullable(output.workflowTask);
@@ -350,7 +396,7 @@ public class TcUtil {
     public boolean deleteObject(ModelObject obj) {
         ServiceData serviceData = dmService.deleteObjects(new ModelObject[]{obj});
 
-        return !ServiceUtil.catchPartialErrors(serviceData);
+        return !catchPartialErrors(serviceData);
     }
 
     /**
@@ -406,7 +452,7 @@ public class TcUtil {
     public Optional<ModelObject> findMoByUid(String uid) {
         ServiceData serviceData = dmService.loadObjects(new String[]{uid});
 
-        if (ServiceUtil.catchPartialErrors(serviceData) || serviceData.sizeOfPlainObjects() == 0) {
+        if (catchPartialErrors(serviceData) || serviceData.sizeOfPlainObjects() == 0) {
             return Optional.empty();
         }
 
@@ -422,7 +468,7 @@ public class TcUtil {
     public Optional<ModelObject[]> findMosByUids(String[] uids) {
         ServiceData serviceData = dmService.loadObjects(uids);
 
-        if (ServiceUtil.catchPartialErrors(serviceData) || serviceData.sizeOfPlainObjects() == 0) {
+        if (catchPartialErrors(serviceData) || serviceData.sizeOfPlainObjects() == 0) {
             return Optional.empty();
         }
 
@@ -458,7 +504,7 @@ public class TcUtil {
         getPSBOMView(itemRevision).ifPresent(psbomView -> inputs[0].bomView = psbomView);
         inputs[0].itemRev = itemRevision;
         CreateBOMWindowsResponse response = smService.createOrReConfigureBOMWindows(inputs);
-        if (ServiceUtil.catchPartialErrors(response.serviceData) ||
+        if (catchPartialErrors(response.serviceData) ||
             response.output == null ||
             response.output.length == 0) {
             return Optional.empty();
@@ -530,6 +576,23 @@ public class TcUtil {
     }
 
     /**
+     * Get home folder of current user
+     *
+     * @return an Optional containing the home folder if successful, otherwise an empty Optional
+     */
+    public Optional<Folder> getHomeFolder() {
+        try {
+            User user = getUser().orElseThrow(() -> new SoaUtilException("Failed to retrieve user"));
+            Folder homeFolder = user.get_home_folder();
+
+            return Optional.ofNullable(homeFolder);
+        } catch (NotLoadedException | SoaUtilException e) {
+            log.error(e.getMessage(), e);
+            return Optional.empty();
+        }
+    }
+
+    /**
      * Get item from id
      *
      * @param itemId the item id
@@ -541,7 +604,7 @@ public class TcUtil {
         infos[0].itemAttributes.put("item_id", itemId);
         GetItemFromIdPref pref = new GetItemFromIdPref();
         GetItemFromAttributeResponse response = dmService.getItemFromAttribute(infos, -1, pref);
-        if (ServiceUtil.catchPartialErrors(response.serviceData) || response.output == null ||
+        if (catchPartialErrors(response.serviceData) || response.output == null ||
             response.output.length == 0) {
             return Optional.empty();
         }
@@ -590,7 +653,7 @@ public class TcUtil {
         nrAttachInfo.propName = propName;
         GetNRPatternsWithCountersResponse response = dmService.getNRPatternsWithCounters(
                 new NRAttachInfo[]{nrAttachInfo});
-        if (ServiceUtil.catchPartialErrors(response.serviceData) || response.patterns == null ||
+        if (catchPartialErrors(response.serviceData) || response.patterns == null ||
             response.patterns.length == 0) {
             return Optional.empty();
         }
@@ -612,7 +675,7 @@ public class TcUtil {
         infoForNextId.propName = propName;
         infoForNextId.typeName = typeName;
         GetNextIdsResponse response = dmService.getNextIds(new InfoForNextId[]{infoForNextId});
-        if (ServiceUtil.catchPartialErrors(response.serviceData) || response.nextIds == null ||
+        if (catchPartialErrors(response.serviceData) || response.nextIds == null ||
             response.nextIds.length == 0) {
             return Optional.empty();
         }
@@ -639,7 +702,7 @@ public class TcUtil {
         propertyNameWithSelectedPattern.put("item_revision_id", "");
         ins[0].propertyNameWithSelectedPattern = propertyNameWithSelectedPattern;
         GenerateNextValuesResponse response = dmService.generateNextValues(ins);
-        if (ServiceUtil.catchPartialErrors(response.data) || response.generatedValues == null ||
+        if (catchPartialErrors(response.data) || response.generatedValues == null ||
             response.generatedValues.length == 0 || response.generatedValues[0] == null ||
             response.generatedValues[0].generatedValues.isEmpty() ||
             !response.generatedValues[0].generatedValues.containsKey("item_revision_id")) {
@@ -815,7 +878,7 @@ public class TcUtil {
     public boolean getProperties(ModelObject mo, String[] propNames) {
         ServiceData serviceData = dmService.getProperties(new ModelObject[]{mo}, propNames);
 
-        return !ServiceUtil.catchPartialErrors(serviceData);
+        return !catchPartialErrors(serviceData);
     }
 
     /**
@@ -828,7 +891,7 @@ public class TcUtil {
     public boolean getProperty(ModelObject mo, String propName) {
         ServiceData serviceData = dmService.getProperties(new ModelObject[]{mo}, new String[]{propName});
 
-        return !ServiceUtil.catchPartialErrors(serviceData);
+        return !catchPartialErrors(serviceData);
     }
 
     /**
@@ -934,7 +997,7 @@ public class TcUtil {
         inputs[0].itemRevisionObj = itemRevision;
 
         GetAvailableViewTypesResponse response = isService.getAvailableViewTypes(inputs);
-        if (ServiceUtil.catchPartialErrors(response.serviceData) ||
+        if (catchPartialErrors(response.serviceData) ||
             response.viewTypesOutputs == null ||
             response.viewTypesOutputs.length == 0) {
             return Optional.empty();
@@ -960,7 +1023,7 @@ public class TcUtil {
     public Optional<RevisionRule> getRevisionRule(String revRuleName) {
         try {
             StructureManagement.GetRevisionRulesResponse response = smService.getRevisionRules();
-            ServiceUtil.catchPartialErrors(response.serviceData);
+            catchPartialErrors(response.serviceData);
             for (StructureManagement.RevisionRuleInfo revisionRuleInfo : response.output) {
                 RevisionRule revRule = revisionRuleInfo.revRule;
                 String objectName = getPropStringValue(revRule, "object_name")
@@ -986,7 +1049,7 @@ public class TcUtil {
     public Optional<ImanQuery> getSavedQueryByName(String name) {
         try {
             GetSavedQueriesResponse response = sqService.getSavedQueries();
-            if (ServiceUtil.catchPartialErrors(response.serviceData) || response.serviceData == null) {
+            if (catchPartialErrors(response.serviceData) || response.serviceData == null) {
                 return Optional.empty();
             }
 
@@ -998,6 +1061,44 @@ public class TcUtil {
 
             return Optional.empty();
         } catch (ServiceException e) {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Get session info
+     *
+     * @return the session info, if failed to get, return an empty Optional
+     */
+    public Optional<GetTCSessionInfoResponse> getSessionInfo() {
+        try {
+            GetTCSessionInfoResponse response = sessionService.getTCSessionInfo();
+            if (catchPartialErrors(response.serviceData)) {
+                return Optional.empty();
+            }
+            sessionInfoResponse = response;
+            return Optional.of(response);
+        } catch (ServiceException e) {
+            log.error("Catch Exception: {}", e.getMessage(), e);
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Get user info of current session
+     *
+     * @return the user info, if failed to get, return an empty Optional
+     */
+    public Optional<User> getUser() {
+        try {
+            if (sessionInfoResponse == null) {
+                sessionInfoResponse = getSessionInfo().orElseThrow(
+                        () -> new SoaUtilException("Failed to retrieve session info"));
+            }
+
+            return Optional.ofNullable(sessionInfoResponse.user);
+        } catch (SoaUtilException e) {
+            log.error(e.getMessage(), e);
             return Optional.empty();
         }
     }
@@ -1053,7 +1154,7 @@ public class TcUtil {
             return Optional.empty();
         }
         GetPreferencesResponse response = pmService.getPreferences(new String[]{prefName}, false);
-        if (ServiceUtil.catchPartialErrors(response.data)) {
+        if (catchPartialErrors(response.data)) {
             return Optional.empty();
         }
 
@@ -1148,6 +1249,50 @@ public class TcUtil {
     }
 
     /**
+     * Login to tc
+     *
+     * @param username             the username
+     * @param password             the password
+     * @param locale               the locale, e.g. en_US, zh_CN
+     * @param sessionDiscriminator the session discriminator, can be any string,
+     *                             used to distinguish different sessions in tc server side
+     * @return true if login successfully, otherwise false
+     */
+    public boolean login(String username, String password, String locale, String sessionDiscriminator) {
+        try {
+            Session.LoginResponse response = sessionService.login(username, password, "", "", locale,
+                                                                  sessionDiscriminator);
+            log.info("Login successful as user '{}'.", username);
+            return true;
+        } catch (Exception e) {
+            log.error("Login failed as user {}.", username, e);
+            return false;
+        }
+    }
+
+    /**
+     * Logout from tc
+     *
+     * @return true if logout successfully, otherwise false
+     */
+    public boolean logout() {
+        String userid = "unknown";
+        try {
+            User user = getUser().get();
+            userid = user.get_userid();
+            ServiceData serviceData = sessionService.logout();
+            if (catchPartialErrors(serviceData)) {
+                return false;
+            }
+            log.info("Logout successful as user '{}'.", userid);
+            return true;
+        } catch (ServiceException | NotLoadedException e) {
+            log.error("Logout failed as user {}.", userid, e);
+            return false;
+        }
+    }
+
+    /**
      * Query model objects by saved query name and query conditions
      *
      * @param name    the query name
@@ -1166,7 +1311,7 @@ public class TcUtil {
             inputs[0].entries = entries;
             inputs[0].values = values;
             SavedQueriesResponse response = sqService.executeSavedQueries(inputs);
-            if (ServiceUtil.catchPartialErrors(response.serviceData) ||
+            if (catchPartialErrors(response.serviceData) ||
                 response.arrayOfResults == null ||
                 response.arrayOfResults.length == 0) {
                 return Optional.empty();
@@ -1213,7 +1358,7 @@ public class TcUtil {
     public boolean refreshMo(ModelObject mo) {
         ServiceData serviceData = dmService.refreshObjects(new ModelObject[]{mo});
 
-        return !ServiceUtil.catchPartialErrors(serviceData);
+        return !catchPartialErrors(serviceData);
     }
 
     /**
@@ -1230,7 +1375,7 @@ public class TcUtil {
         infos[0].newRevId = getNextRevId(rev).orElseThrow(() -> new SoaUtilException("Failed in getNextId"));
 
         ReviseResponse2 response = dmService.revise2(infos);
-        if (ServiceUtil.catchPartialErrors(response.serviceData) || response.reviseOutputMap.isEmpty() ||
+        if (catchPartialErrors(response.serviceData) || response.reviseOutputMap.isEmpty() ||
             !response.reviseOutputMap.containsKey("soa")) {
             return Optional.empty();
         }
@@ -1247,7 +1392,54 @@ public class TcUtil {
     public boolean saveBOMWindow(BOMWindow bomWindow) {
         SaveBOMWindowsResponse response = smService.saveBOMWindows(new BOMWindow[]{bomWindow});
 
-        return !ServiceUtil.catchPartialErrors(response.serviceData);
+        return !catchPartialErrors(response.serviceData);
+    }
+
+    /**
+     * Set bom window pack
+     * TODO: optimization
+     *
+     * @param window the bom window
+     * @return true if successful, otherwise false
+     * @throws NotLoadedException if failed to get property from bom window
+     */
+    public boolean setBOMWindowPack(BOMWindow window) throws NotLoadedException {
+        log.info("setBOMWindowPack start");
+        String propName = "is_packed_by_default";
+        dmService.getProperties(new ModelObject[]{window}, new String[]{propName});
+        boolean bolPack = window.get_is_packed_by_default();
+        System.out.println(propName + "=" + bolPack);
+        if (!bolPack) {
+            String[] as = {"ENABLE_PSE_BULLETIN_BOARD"};
+            DataManagement.PropInfo[] apropinfo = new DataManagement.PropInfo[1];
+            apropinfo[0] = new DataManagement.PropInfo();
+            apropinfo[0].object = window;
+            DataManagement.NameValueStruct1[] vecNameVal = new DataManagement.NameValueStruct1[1];
+            vecNameVal[0] = new DataManagement.NameValueStruct1();
+            vecNameVal[0].name = propName;
+            vecNameVal[0].values = new String[]{Property.toBooleanString(true)};
+            apropinfo[0].vecNameVal = vecNameVal;
+            dmService.setProperties(apropinfo, as);
+            DataManagement.SetPropertyResponse setpropertyresponse = dmService.setProperties(apropinfo, as);
+            dmService.refreshObjects(new ModelObject[]{window});
+        }
+        bolPack = window.get_is_packed_by_default();
+        log.info("{}.now={}", propName, bolPack);
+        log.info("setBOMWindowPack end");
+        return true;
+    }
+
+    /**
+     * Set bypass flag in session, if bypass is true, it means bypassing all the business rules in tc, otherwise not.
+     *
+     * @param bypass the bypass flag
+     */
+    public void setBypass(boolean bypass) {
+        StateNameValue[] stateNameValues = new StateNameValue[1];
+        stateNameValues[0] = new StateNameValue();
+        stateNameValues[0].name = "bypassFlag";
+        stateNameValues[0].value = Property.toBooleanString(bypass);
+        sessionService.setUserSessionState(stateNameValues);
     }
 
     /**
@@ -1284,7 +1476,29 @@ public class TcUtil {
 
         SetPropertyResponse response = dmService.setProperties(infos, new String[]{});
 
-        return !ServiceUtil.catchPartialErrors(response.data);
+        return !catchPartialErrors(response.data);
+    }
+
+    /**
+     * Catch partial errors
+     *
+     * @param serviceData service data
+     * @return true if there are partial errors
+     */
+    private boolean catchPartialErrors(ServiceData serviceData) {
+        if (serviceData == null) {
+            log.error("Catch partial error: serviceData is null");
+            return true;
+        }
+
+        if (serviceData.sizeOfPartialErrors() > 0) {
+            for (int i = 0; i < serviceData.sizeOfPartialErrors(); i++) {
+                log.error("Catch partial error: {}", Arrays.toString(serviceData.getPartialError(i).getMessages()));
+            }
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -1298,7 +1512,7 @@ public class TcUtil {
             ExportToApplicationResponse1 response = fieService.exportToApplication(
                     new ExportToApplicationInputData2[]{inputData});
             // Catch errors but continue
-            ServiceUtil.catchPartialErrors(response.serviceData);
+            catchPartialErrors(response.serviceData);
             if (response.transientFileReadTickets == null || response.transientFileReadTickets.length == 0) {
                 return Optional.empty();
             }
@@ -1328,7 +1542,7 @@ public class TcUtil {
                 () -> new SoaUtilException("Not found revision rule by name: " + revRule));
         inputs[0].revRuleConfigInfo = revRuleConfigInfo;
         CreateBOMWindowsResponse response = smService.createOrReConfigureBOMWindows(inputs);
-        if (ServiceUtil.catchPartialErrors(response.serviceData) ||
+        if (catchPartialErrors(response.serviceData) ||
             response.output == null ||
             response.output.length == 0) {
             return Optional.empty();
@@ -1357,37 +1571,13 @@ public class TcUtil {
             inputs[0].operations[0].newReleaseStatusTypeName = newStatus;
             inputs[0].operations[0].existingreleaseStatusTypeName = oldStatus;
             SetReleaseStatusResponse response = wfService.setReleaseStatus(inputs);
-            return !ServiceUtil.catchPartialErrors(response.serviceData);
+            return !catchPartialErrors(response.serviceData);
         } catch (ServiceException e) {
             log.error("Catch Exception: {}", e.getMessage(), e);
             return false;
         }
     }
 
-    public void setBOMWindowPack(BOMWindow window) throws NotLoadedException {
-        log.info("setBOMWindowPack start");
-        String propName = "is_packed_by_default";
-        dmService.getProperties(new ModelObject[]{window}, new String[]{propName});
-        boolean bolPack = window.get_is_packed_by_default();
-        System.out.println(propName + "=" + bolPack);
-        if (!bolPack) {
-            String[] as = {"ENABLE_PSE_BULLETIN_BOARD"};
-            DataManagement.PropInfo[] apropinfo = new DataManagement.PropInfo[1];
-            apropinfo[0] = new DataManagement.PropInfo();
-            apropinfo[0].object = window;
-            DataManagement.NameValueStruct1[] vecNameVal = new DataManagement.NameValueStruct1[1];
-            vecNameVal[0] = new DataManagement.NameValueStruct1();
-            vecNameVal[0].name = propName;
-            vecNameVal[0].values = new String[]{Property.toBooleanString(true)};
-            apropinfo[0].vecNameVal = vecNameVal;
-            dmService.setProperties(apropinfo, as);
-            DataManagement.SetPropertyResponse setpropertyresponse = dmService.setProperties(apropinfo, as);
-            dmService.refreshObjects(new ModelObject[]{window});
-        }
-        bolPack = window.get_is_packed_by_default();
-        log.info("{}.now={}", propName, bolPack);
-        log.info("setBOMWindowPack end");
-    }
 
     // public Optional<File> downloadFile(Dataset dataset) {
     //     ModelObject[] refs = getPropArrayValue(dataset, "ref_list").orElseThrow(

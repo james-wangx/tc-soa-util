@@ -2,4 +2,4 @@
 
 Teamcenter SOA Util
 
-current teamcenter version: 2412
+Teamcenter version: 13000.3.0
