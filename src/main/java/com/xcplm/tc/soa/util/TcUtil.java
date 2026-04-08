@@ -659,7 +659,7 @@ public class TcUtil {
      */
     public Optional<ItemRevision> getNotBaselineLatestReleasedRev(Item item, String statusName) {
         Optional<List<ModelObject>> revisionListOpt = getPropListValue(item, "revision_list");
-        if (revisionListOpt.isEmpty()) {
+        if (!revisionListOpt.isPresent()) {
             return Optional.empty();
         }
 
@@ -673,7 +673,7 @@ public class TcUtil {
             }
 
             Optional<Calendar> dateReleasedOpt = getPropCalendarValue(rev, "date_released");
-            if (dateReleasedOpt.isEmpty()) {
+            if (!dateReleasedOpt.isPresent()) {
                 continue;
             }
             ReleaseStatus lastReleaseStatus = (ReleaseStatus) getPropObjValue(rev, "last_release_status").get();
@@ -1077,7 +1077,7 @@ public class TcUtil {
 
         for (ModelObject revision : revisions) {
             Optional<ModelObject[]> resOpt = getPropArrayValue(revision, "release_status_list");
-            if (resOpt.isEmpty()) {
+            if (!resOpt.isPresent()) {
                 return Optional.of((ItemRevision) revision);
             }
         }
@@ -1111,7 +1111,7 @@ public class TcUtil {
 
         for (ModelObject revision : revisions) {
             Optional<ModelObject[]> resOpt = getPropArrayValue(revision, "release_status_list");
-            if (resOpt.isEmpty()) {
+            if (!resOpt.isPresent()) {
                 revList.add((ItemRevision) revision);
             }
         }

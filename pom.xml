@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.codicefun.tc.soa</groupId>
+  <groupId>com.xcplm.tc.soa</groupId>
   <artifactId>tc-soa-util</artifactId>
   <version>13000.3.0</version>
 
   <properties>
-    <maven.compiler.source>17</maven.compiler.source>
-    <maven.compiler.target>17</maven.compiler.target>
+    <maven.compiler.source>8</maven.compiler.source>
+    <maven.compiler.target>8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <logback.version>1.2.13</logback.version>
@@ -21,9 +21,11 @@
     <httpclient.version>4.5.13</httpclient.version>
     <xercesImpl.version>2.12.1</xercesImpl.version>
     <tc.version>13000.3.0</tc.version>
+    <maven-shade-plugin.version>3.6.0</maven-shade-plugin.version>
   </properties>
 
   <dependencies>
+    <!-- project dependencies -->
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
@@ -42,6 +44,7 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- support java 11 -->
     <dependency>
       <groupId>javax.xml.bind</groupId>
       <artifactId>jaxb-api</artifactId>
@@ -57,17 +60,8 @@
       <artifactId>jaxb-impl</artifactId>
       <version>2.3.3</version>
     </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
-      <version>2.15.2</version>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>2.15.2</version>
-    </dependency>
 
+    <!-- teamcenter dependencies -->
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-api</artifactId>
@@ -153,11 +147,6 @@
       <artifactId>tcserver</artifactId>
       <version>${tc.version}</version>
     </dependency>
-    <!-- <dependency> -->
-    <!--   <groupId>com.teamcenter.logging</groupId> -->
-    <!--   <artifactId>tclogging</artifactId> -->
-    <!--   <version>${tc.version}</version> -->
-    <!-- </dependency> -->
   </dependencies>
 
 </project>

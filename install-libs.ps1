@@ -1,6 +1,6 @@
 # Configuration
 $libHome = "C:\Program Files\Siemens\TC2412_ROOT\soa_client\java\libs"
-$version = "2412"
+$version = "13000.0.0"
 
 # Function: convert CamelCase to kebab-case
 function Convert-ToKebabCase

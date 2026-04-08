@@ -16,12 +16,10 @@ import com.teamcenter.soa.client.model.PartialErrorListener;
  * returned.
  *
  */
-public class AppXPartialErrorListener implements PartialErrorListener
-{
+public class AppXPartialErrorListener implements PartialErrorListener {
 
     @Override
-    public void handlePartialError(ErrorStack[] stacks)
-    {
+    public void handlePartialError(ErrorStack[] stacks) {
         if (stacks.length == 0) return;
 
         System.out.println();
@@ -29,30 +27,24 @@ public class AppXPartialErrorListener implements PartialErrorListener
         System.out.println("Partial Errors caught in com.teamcenter.clientx.AppXPartialErrorListener.");
 
 
-        for (int i = 0; i < stacks.length; i++)
-        {
+        for (int i = 0; i < stacks.length; i++) {
             ErrorValue[] errors = stacks[i].getErrorValues();
             System.out.print("Partial Error for ");
 
             // The different service implementation may optionally associate
             // an ModelObject, client ID, or nothing, with each partial error
-            if (stacks[i].hasAssociatedObject())
-            {
-                System.out.println( "object " + stacks[i].getAssociatedObject().getUid()  );
-            }
-            else if (stacks[i].hasClientId())
-            {
-                System.out.println( "client id " + stacks[i].getClientId()  );
-            }
-            else if (stacks[i].hasClientIndex())
-                System.out.println( "client index " + stacks[i].getClientIndex()  );
+            if (stacks[i].hasAssociatedObject()) {
+                System.out.println("object " + stacks[i].getAssociatedObject().getUid());
+            } else if (stacks[i].hasClientId()) {
+                System.out.println("client id " + stacks[i].getClientId());
+            } else if (stacks[i].hasClientIndex())
+                System.out.println("client index " + stacks[i].getClientIndex());
 
 
             // Each Partial Error will have one or more contributing error messages
-            for (int j = 0; j < errors.length; j++)
-            {
+            for (int j = 0; j < errors.length; j++) {
                 System.out.println("    Code: " + errors[j].getCode() + "\tSeverity: "
-                        + errors[j].getLevel() + "\t" + errors[j].getMessage());
+                                   + errors[j].getLevel() + "\t" + errors[j].getMessage());
             }
         }
 

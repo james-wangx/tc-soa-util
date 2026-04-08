@@ -26,14 +26,13 @@ import java.util.Locale;
 import java.util.Vector;
 
 
-public class AppXSession
-{
+public class AppXSession {
     /**
      * Single instance of the Connection object that is shared throughout
      * the application. This Connection object is needed whenever a Service
      * stub is instantiated.
      */
-    private static Connection           connection;
+    private static Connection connection;
 
     /**
      * The credentialManager is used both by the Session class and the Teamcenter
@@ -45,36 +44,30 @@ public class AppXSession
     /**
      * Create an instance of the Session with a connection to the specified
      * server.
-     *
+     * <p>
      * Add implementations of the ExceptionHandler, PartialErrorListener,
      * ChangeListener, and DeleteListeners.
      *
-     * @param host      Address of the host to connect to, http://serverName:port/tc
+     * @param host Address of the host to connect to, http://serverName:port/tc
      */
-    public AppXSession(String host)
-    {
+    public AppXSession(String host) {
         // Create an instance of the CredentialManager, this is used
         // by the SOA Framework to get the user's credentials when
         // challenged by the server (session timeout on the web tier).
         credentialManager = new AppXCredentialManager();
 
-        String protocol=null;
+        String protocol = null;
         String envNameTccs = null;
-        if ( host.startsWith("http") )
-        {
-            protocol   = SoaConstants.HTTP;
-        }
-        else if ( host.startsWith("tccs") )
-        {
-            protocol   = SoaConstants.TCCS;
+        if (host.startsWith("http")) {
+            protocol = SoaConstants.HTTP;
+        } else if (host.startsWith("tccs")) {
+            protocol = SoaConstants.TCCS;
             host = host.trim();
             int envNameStart = host.indexOf('/') + 2;
-            envNameTccs = host.substring( envNameStart);
+            envNameTccs = host.substring(envNameStart);
             host = "";
-        }
-        else
-        {
-            protocol   = SoaConstants.IIOP;
+        } else {
+            protocol = SoaConstants.IIOP;
         }
 
 
@@ -82,17 +75,15 @@ public class AppXSession
         // until a service request is made
         connection = new Connection(host, credentialManager, SoaConstants.REST, protocol);
 
-        if( protocol == SoaConstants.TCCS )
-        {
-           connection.setOption(  Connection.TCCS_ENV_NAME, envNameTccs );
+        if (protocol == SoaConstants.TCCS) {
+            connection.setOption(Connection.TCCS_ENV_NAME, envNameTccs);
         }
 
-        // connection.setOption("OPT_CACHE_MODEL_OBJECTS", "false");
 
         // Add an ExceptionHandler to the Connection, this will handle any
         // InternalServerException, communication errors, XML marshaling errors
         // .etc
-        // connection.setExceptionHandler(new AppXExceptionHandler());
+        connection.setExceptionHandler(new AppXExceptionHandler());
 
         // While the above ExceptionHandler is required, all of the following
         // Listeners are optional. Client application can add as many or as few Listeners
@@ -100,64 +91,132 @@ public class AppXSession
 
         // Add a Partial Error Listener, this will be notified when ever a
         // a service returns partial errors.
-        // connection.getModelManager().addPartialErrorListener(new AppXPartialErrorListener());
+        connection.getModelManager().addPartialErrorListener(new AppXPartialErrorListener());
 
         // Add a Change and Delete Listener, this will be notified when ever a
         // a service returns model objects that have been updated or deleted.
-        // connection.getModelManager().addModelEventListener(new AppXModelEventListener());
+        connection.getModelManager().addModelEventListener(new AppXModelEventListener());
 
 
         // Add a Request Listener, this will be notified before and after each
         // service request is sent to the server.
-        // Connection.addRequestListener( new AppXRequestListener() );
+        Connection.addRequestListener(new AppXRequestListener());
 
     }
 
     /**
      * Get the single Connection object for the application
      *
-     * @return  connection
+     * @return connection
      */
-    public static Connection getConnection()
-    {
+    public static Connection getConnection() {
         return connection;
+    }
+
+    /**
+     * Print some basic information for a list of objects
+     *
+     * @param objects
+     */
+    public static void printObjects(ModelObject[] objects) {
+        if (objects == null)
+            return;
+
+        SimpleDateFormat format = new SimpleDateFormat("M/d/yyyy h:mm a",
+                                                       new Locale("en", "US")); // Simple no time zone
+
+        // Ensure that the referenced User objects that we will use below are loaded
+        getUsers(objects);
+
+        System.out.println("Name\t\tOwner\t\tLast Modified");
+        System.out.println("====\t\t=====\t\t=============");
+        for (int i = 0; i < objects.length; i++) {
+            if (!(objects[i] instanceof WorkspaceObject))
+                continue;
+
+            WorkspaceObject wo = (WorkspaceObject) objects[i];
+            try {
+                String name = wo.get_object_string();
+                User owner = (User) wo.get_owning_user();
+                Calendar lastModified = wo.get_last_mod_date();
+
+                System.out.println(name + "\t" + owner.get_user_name() + "\t"
+                                   + format.format(lastModified.getTime()));
+            } catch (NotLoadedException e) {
+                // Print out a message, and skip to the next item in the folder
+                // Could do a DataManagementService.getProperties call at this point
+                System.out.println(e.getMessage());
+                System.out.println(
+                        "The Object Property Policy ($TC_DATA/soa/policies/Default.xml) is not configured with this property.");
+            }
+        }
+
+    }
+
+    private static void getUsers(ModelObject[] objects) {
+        if (objects == null)
+            return;
+
+        DataManagementService dmService = DataManagementService.getService(AppXSession.getConnection());
+
+        List<User> unKnownUsers = new Vector<User>();
+        for (int i = 0; i < objects.length; i++) {
+            if (!(objects[i] instanceof WorkspaceObject))
+                continue;
+
+            WorkspaceObject wo = (WorkspaceObject) objects[i];
+
+            User owner = null;
+            try {
+                owner = (User) wo.get_owning_user();
+                owner.get_user_name();
+            } catch (NotLoadedException e) {
+                if (owner != null)
+                    unKnownUsers.add(owner);
+            }
+        }
+        User[] users = unKnownUsers.toArray(new User[unKnownUsers.size()]);
+        String[] attributes = {"user_name"};
+
+
+        // *****************************
+        // Execute the service operation
+        // *****************************
+        dmService.getProperties(users, attributes);
+
+
     }
 
     /**
      * Login to the Teamcenter Server
      *
      */
-    public User login()
-    {
+    public User login() {
         // Get the service stub
         SessionService sessionService = SessionService.getService(connection);
 
-        try
-        {
+        try {
             // Prompt for credentials until they are right, or until user
             // cancels
             String[] credentials = credentialManager.promptForCredentials();
-            while (true)
-            {
-                try
-                {
+            while (true) {
+                try {
 
                     // *****************************
                     // Execute the service operation
                     // *****************************
                     LoginResponse out = sessionService.login(credentials[0], credentials[1],
-                            credentials[2], credentials[3],"", credentials[4]);
+                                                             credentials[2], credentials[3], "", credentials[4]);
 
                     return out.user;
-                }
-                catch (InvalidCredentialsException e)
-                {
+                } catch (InvalidCredentialsException e) {
                     credentials = credentialManager.getCredentials(e);
                 }
             }
         }
         // User canceled the operation, don't need to tell him again
-        catch (CanceledOperationException e) {}
+        catch (CanceledOperationException e) {
+        }
 
         // Exit the application
         System.exit(0);
@@ -168,98 +227,16 @@ public class AppXSession
      * Terminate the session with the Teamcenter Server
      *
      */
-    public void logout()
-    {
+    public void logout() {
         // Get the service stub
         SessionService sessionService = SessionService.getService(connection);
-        try
-        {
+        try {
             // *****************************
             // Execute the service operation
             // *****************************
             sessionService.logout();
+        } catch (ServiceException e) {
         }
-        catch (ServiceException e){}
-    }
-
-    /**
-     * Print some basic information for a list of objects
-     *
-     * @param objects
-     */
-    public static void printObjects(ModelObject[] objects)
-    {
-        if(objects == null)
-            return;
-
-        SimpleDateFormat format = new SimpleDateFormat("M/d/yyyy h:mm a", new Locale("en", "US")); // Simple no time zone
-
-        // Ensure that the referenced User objects that we will use below are loaded
-        getUsers( objects );
-
-        System.out.println("Name\t\tOwner\t\tLast Modified");
-        System.out.println("====\t\t=====\t\t=============");
-        for (int i = 0; i < objects.length; i++)
-        {
-            if(!(objects[i] instanceof WorkspaceObject wo))
-                continue;
-
-            try
-            {
-                String name = wo.get_object_string();
-                User owner = (User) wo.get_owning_user();
-                Calendar lastModified =wo.get_last_mod_date();
-
-                System.out.println(name + "\t" + owner.get_user_name() + "\t"
-                        + format.format(lastModified.getTime()));
-            }
-            catch (NotLoadedException e)
-            {
-                // Print out a message, and skip to the next item in the folder
-                // Could do a DataManagementService.getProperties call at this point
-                System.out.println(e.getMessage());
-                System.out.println("The Object Property Policy ($TC_DATA/soa/policies/Default.xml) is not configured with this property.");
-            }
-        }
-
-    }
-
-
-    private static void getUsers( ModelObject[] objects )
-    {
-        if(objects == null)
-            return;
-
-        DataManagementService dmService = DataManagementService.getService(AppXSession.getConnection());
-
-        List<User> unKnownUsers = new Vector<User>();
-        for (int i = 0; i < objects.length; i++)
-        {
-            if(!(objects[i] instanceof WorkspaceObject wo))
-                continue;
-
-            User owner = null;
-            try
-            {
-                owner = (User) wo.get_owning_user();
-                owner.get_user_name();
-            }
-            catch (NotLoadedException e)
-            {
-                if(owner != null)
-                    unKnownUsers.add(owner);
-            }
-        }
-        User[] users = unKnownUsers.toArray(new User[unKnownUsers.size()]);
-        String[] attributes = { "user_name" };
-
-
-        // *****************************
-        // Execute the service operation
-        // *****************************
-        dmService.getProperties(users, attributes);
-
-
     }
 
 
