@@ -17,11 +17,7 @@ public class SessionTest extends UtilTest {
                                         .orElseThrow(() -> new TestException("Failed to find MO by UID"));
                 String itemId = tcUtil.getPropStringValue(rev, "item_id").get();
                 System.out.println("itemId = " + itemId);
-                try {
-                    Thread.sleep(1000 * 2);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                Thread.sleep(1000 * 2);
             }
         }, -1, 1, SoaConnException.class);
 

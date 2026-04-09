@@ -2,8 +2,6 @@ package com.xcplm.tc.soa.util;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.function.Supplier;
-
 @Slf4j
 public class RetryUtil {
 
@@ -21,7 +19,7 @@ public class RetryUtil {
      */
     @SuppressWarnings({"BusyWait", "UnusedReturnValue"})
     public static <T, E extends Exception> T executeWithRetry(
-            Supplier<T> action,
+            Retryable<T> action,
             int maxRetries,
             long retryIntervalMinutes,
             Class<E> retryOnExceptionClass) throws Exception {
@@ -29,11 +27,12 @@ public class RetryUtil {
 
         while (true) {
             try {
-                attempt++;
-                return action.get();
+                T result = action.execute();
+                attempt = 0;
+                return result;
             } catch (Exception e) {
                 if (retryOnExceptionClass.isInstance(e)) {
-                    log.error("Connection failed, attempt {}: {}", attempt, e.getMessage());
+                    log.error("Connection failed, attempt {}: {}", ++attempt, e.getMessage());
 
                     if (maxRetries != -1 && attempt >= maxRetries) {
                         throw new RuntimeException("Maximum retry attempts reached, operation still failed", e);

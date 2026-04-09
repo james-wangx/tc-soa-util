@@ -1,5 +1,6 @@
 package com.xcplm.tc.soa.util;
 
+import com.teamcenter.schemas.soa._2006_03.exceptions.InvalidCredentialsException;
 import com.teamcenter.schemas.soa._2006_03.exceptions.ServiceException;
 import com.teamcenter.services.internal.strong.structuremanagement._2011_06.Structure.CreateOrSaveAsPSBOMViewRevisionInput;
 import com.teamcenter.services.internal.strong.structuremanagement._2011_06.Structure.CreateOrSaveAsPSBOMViewRevisionResponse;
@@ -56,6 +57,7 @@ import com.teamcenter.soa.client.model.Property;
 import com.teamcenter.soa.client.model.ServiceData;
 import com.teamcenter.soa.client.model.strong.*;
 import com.teamcenter.soa.exceptions.NotLoadedException;
+import com.xcplm.tc.soa.exception.SoaConnException;
 import com.xcplm.tc.soa.exception.SoaUtilException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -1264,10 +1266,28 @@ public class TcUtil {
                                                                   sessionDiscriminator);
             log.info("Login successful as user '{}'.", username);
             return true;
-        } catch (Exception e) {
-            log.error("Login failed as user {}.", username, e);
+        } catch (InvalidCredentialsException e) {
+            log.error("Login failed as user '{}'.", username, e);
             return false;
         }
+    }
+
+    /**
+     * Login to tc with retry mechanism, if login failed due to SoaConnException, it will retry until maxRetries is reached.
+     *
+     * @param username             the username
+     * @param password             the password
+     * @param locale               the locale, e.g. en_US, zh_CN
+     * @param sessionDiscriminator the session discriminator, can be any string,
+     *                             used to distinguish different sessions in tc server side
+     * @param maxRetries           the max retry times (-1 for infinite retries)
+     * @param retryIntervalMinutes the retry interval minutes
+     * @throws Exception if login failed after retrying or caught exception is not SoaConnException
+     */
+    public void loginWithRetry(String username, String password, String locale, String sessionDiscriminator,
+                               int maxRetries, int retryIntervalMinutes) throws Exception {
+        RetryUtil.executeWithRetry(() -> login(username, password, locale, sessionDiscriminator), maxRetries,
+                                   retryIntervalMinutes, SoaConnException.class);
     }
 
     /**
@@ -1287,7 +1307,7 @@ public class TcUtil {
             log.info("Logout successful as user '{}'.", userid);
             return true;
         } catch (ServiceException | NotLoadedException e) {
-            log.error("Logout failed as user {}.", userid, e);
+            log.error("Logout failed as user '{}'.", userid, e);
             return false;
         }
     }

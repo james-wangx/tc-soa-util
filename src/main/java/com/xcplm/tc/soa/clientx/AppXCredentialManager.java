@@ -10,6 +10,7 @@ import com.teamcenter.schemas.soa._2006_03.exceptions.InvalidCredentialsExceptio
 import com.teamcenter.schemas.soa._2006_03.exceptions.InvalidUserException;
 import com.teamcenter.soa.client.CredentialManager;
 import com.teamcenter.soa.exceptions.CanceledOperationException;
+import com.xcplm.tc.soa.exception.SoaConnException;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -65,19 +66,12 @@ public class AppXCredentialManager implements CredentialManager {
 
     /**
      * Return the cached credentials.
-     * This method will be called when a service request is sent without a valid
-     * session ( session has expired on the server).
+     * This method will be called when a service request is sent without a valid session (session has expired on the server).
      *
      * @see CredentialManager#getCredentials(InvalidUserException)
      */
-    public String[] getCredentials(InvalidUserException e)
-            throws CanceledOperationException {
-        // Have not logged in yet, should not happen but just in case
-        if (name == null) return promptForCredentials();
-
-        // Return cached credentials
-        String[] tokens = {name, password, group, role, discriminator};
-        return tokens;
+    public String[] getCredentials(InvalidUserException e) {
+        throw new SoaConnException("Session has expired, please login again.");
     }
 
     /**
