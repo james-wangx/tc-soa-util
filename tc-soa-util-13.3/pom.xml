@@ -17,11 +17,10 @@
     <lombok.version>1.18.36</lombok.version>
     <junit.version>5.11.3</junit.version>
 
+    <tc.version>13000.3.0</tc.version>
     <log4j.version>2.14.0</log4j.version>
     <httpclient.version>4.5.13</httpclient.version>
     <xercesImpl.version>2.12.1</xercesImpl.version>
-    <tc.version>13000.3.0</tc.version>
-    <maven-shade-plugin.version>3.6.0</maven-shade-plugin.version>
   </properties>
 
   <dependencies>

@@ -1297,7 +1297,7 @@ public class TcUtil {
         String userid = "unknown";
         try {
             User user = getUser().get();
-            userid = user.get_userid();
+            userid = user.get_user_id();
             ServiceData serviceData = sessionService.logout();
             if (catchPartialErrors(serviceData)) {
                 return false;
