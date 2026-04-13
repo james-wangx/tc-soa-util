@@ -10,7 +10,6 @@ import com.teamcenter.services.strong.administration.PreferenceManagementService
 import com.teamcenter.services.strong.administration._2012_09.PreferenceManagement.CompletePreference;
 import com.teamcenter.services.strong.administration._2012_09.PreferenceManagement.GetPreferencesResponse;
 import com.teamcenter.services.strong.cad.StructureManagementService;
-import com.teamcenter.services.strong.cad._2007_01.StructureManagement;
 import com.teamcenter.services.strong.cad._2007_01.StructureManagement.*;
 import com.teamcenter.services.strong.cad._2008_06.StructureManagement.SaveBOMWindowsResponse;
 import com.teamcenter.services.strong.cad._2019_06.StructureManagement.CreateWindowsInfo3;
@@ -24,7 +23,6 @@ import com.teamcenter.services.strong.core._2007_12.Session.StateNameValue;
 import com.teamcenter.services.strong.core._2008_06.DataManagement.*;
 import com.teamcenter.services.strong.core._2009_10.DataManagement.GetItemFromAttributeInfo;
 import com.teamcenter.services.strong.core._2009_10.DataManagement.GetItemFromAttributeResponse;
-import com.teamcenter.services.strong.core._2010_09.DataManagement;
 import com.teamcenter.services.strong.core._2010_09.DataManagement.NameValueStruct1;
 import com.teamcenter.services.strong.core._2010_09.DataManagement.PropInfo;
 import com.teamcenter.services.strong.core._2010_09.DataManagement.SetPropertyResponse;
@@ -1024,9 +1022,9 @@ public class TcUtil {
      */
     public Optional<RevisionRule> getRevisionRule(String revRuleName) {
         try {
-            StructureManagement.GetRevisionRulesResponse response = smService.getRevisionRules();
+            GetRevisionRulesResponse response = smService.getRevisionRules();
             catchPartialErrors(response.serviceData);
-            for (StructureManagement.RevisionRuleInfo revisionRuleInfo : response.output) {
+            for (RevisionRuleInfo revisionRuleInfo : response.output) {
                 RevisionRule revRule = revisionRuleInfo.revRule;
                 String objectName = getPropStringValue(revRule, "object_name")
                         .orElseThrow(() -> new SoaUtilException(
@@ -1431,16 +1429,16 @@ public class TcUtil {
         System.out.println(propName + "=" + bolPack);
         if (!bolPack) {
             String[] as = {"ENABLE_PSE_BULLETIN_BOARD"};
-            DataManagement.PropInfo[] apropinfo = new DataManagement.PropInfo[1];
-            apropinfo[0] = new DataManagement.PropInfo();
+            PropInfo[] apropinfo = new PropInfo[1];
+            apropinfo[0] = new PropInfo();
             apropinfo[0].object = window;
-            DataManagement.NameValueStruct1[] vecNameVal = new DataManagement.NameValueStruct1[1];
-            vecNameVal[0] = new DataManagement.NameValueStruct1();
+            NameValueStruct1[] vecNameVal = new NameValueStruct1[1];
+            vecNameVal[0] = new NameValueStruct1();
             vecNameVal[0].name = propName;
             vecNameVal[0].values = new String[]{Property.toBooleanString(true)};
             apropinfo[0].vecNameVal = vecNameVal;
             dmService.setProperties(apropinfo, as);
-            DataManagement.SetPropertyResponse setpropertyresponse = dmService.setProperties(apropinfo, as);
+            SetPropertyResponse setpropertyresponse = dmService.setProperties(apropinfo, as);
             dmService.refreshObjects(new ModelObject[]{window});
         }
         bolPack = window.get_is_packed_by_default();
