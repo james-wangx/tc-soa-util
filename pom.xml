@@ -6,11 +6,11 @@
 
   <groupId>com.xcplm.tc.soa</groupId>
   <artifactId>tc-soa-util</artifactId>
-  <version>13000.3.0</version>
+  <version>2512</version>
 
   <properties>
-    <maven.compiler.source>8</maven.compiler.source>
-    <maven.compiler.target>8</maven.compiler.target>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <logback.version>1.2.13</logback.version>
@@ -20,7 +20,7 @@
     <log4j.version>2.14.0</log4j.version>
     <httpclient.version>4.5.13</httpclient.version>
     <xercesImpl.version>2.12.1</xercesImpl.version>
-    <tc.version>13000.3.0</tc.version>
+    <tc.version>2512</tc.version>
     <maven-shade-plugin.version>3.6.0</maven-shade-plugin.version>
   </properties>
 
@@ -42,23 +42,6 @@
       <artifactId>junit-jupiter</artifactId>
       <version>${junit.version}</version>
       <scope>test</scope>
-    </dependency>
-
-    <!-- support java 11 -->
-    <dependency>
-      <groupId>javax.xml.bind</groupId>
-      <artifactId>jaxb-api</artifactId>
-      <version>2.3.1</version>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.xml.bind</groupId>
-      <artifactId>jaxb-core</artifactId>
-      <version>2.3.0.1</version>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.xml.bind</groupId>
-      <artifactId>jaxb-impl</artifactId>
-      <version>2.3.3</version>
     </dependency>
 
     <!-- teamcenter dependencies -->
