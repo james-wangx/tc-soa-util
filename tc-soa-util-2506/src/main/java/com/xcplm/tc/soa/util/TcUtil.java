@@ -938,6 +938,31 @@ public class TcUtil {
     }
 
     /**
+     * Get property string array value
+     *
+     * @param obj      the model object
+     * @param propName the property name
+     * @return the property string array value, if the property is not present or failed to get, return an empty Optional
+     */
+    public Optional<String[]> getPropStringArrayValue(ModelObject obj, String propName) {
+        if (obj == null) {
+            return Optional.empty();
+        }
+
+        try {
+            getProperty(obj, propName);
+            String[] array = obj.getPropertyObject(propName).getStringArrayValue();
+            if (array == null || array.length == 0) {
+                return Optional.empty();
+            }
+            return Optional.of(array);
+        } catch (NotLoadedException e) {
+            log.error("Get property failed: {}", e.getMessage(), e);
+            return Optional.empty();
+        }
+    }
+
+    /**
      * Get property string value
      *
      * @param obj      Model object
