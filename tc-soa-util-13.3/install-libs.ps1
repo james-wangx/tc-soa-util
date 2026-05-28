@@ -74,13 +74,6 @@ $specialJars = @(
         GroupId = "com.teamcenter.net"
         ArtifactId = "tcserver"
         Version = $Version
-    },
-
-    [PSCustomObject]@{
-        File = "$LibHome\TcLogging.jar"
-        GroupId = "com.teamcenter.logging"
-        ArtifactId = "tclogging"
-        Version = $Version
     }
 )
 
