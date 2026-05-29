@@ -1,9 +1,9 @@
 # ============================================
-# Teamcenter SOA Jar Installer
+# Teamcenter SOA Java Dependencies Installer
 # ============================================
 
 param(
-# Teamcenter SOA libs directory
+# Dependencies directory
     [Parameter(Mandatory = $true)]
     [string]$LibHome,
 
