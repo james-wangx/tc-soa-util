@@ -14,12 +14,13 @@ class UtilTest {
 
     @BeforeAll
     static void init() {
-        // session = new AppXSession("http://192.168.80.107:7001/tc");
-        session = new AppXSession("http://tc2412:7001/tc");
+        session = new AppXSession("http://192.168.80.105:8888/tc");
+        // SessionUtil.login("http://172.168.10.101:7001/tc", "james", "james", "zh_CN", "tc-soa-util-test");
+        // SessionUtil.login("http://192.168.80.101:7001/tc", "james", "james", "zh_CN", "tc-soa-util-test");
         // Login use tccs
         // SessionUtil.login("tccs://TcWeb1", "james", "james", "zh_CN", "tc-soa-util-test");
         tcUtil = new TcUtil(session.getConnection());
-        tcUtil.login("james", "james", "zh_CN", "tc-soa-util-test");
+        // tcUtil.login("00001", "00001", "zh_CN", "tc-soa-util-test");
     }
 
     @AfterAll

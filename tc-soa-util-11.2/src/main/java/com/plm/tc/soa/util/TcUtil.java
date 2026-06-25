@@ -14,7 +14,6 @@ import com.teamcenter.services.strong.administration._2012_09.PreferenceManageme
 import com.teamcenter.services.strong.cad.StructureManagementService;
 import com.teamcenter.services.strong.cad._2007_01.StructureManagement.*;
 import com.teamcenter.services.strong.cad._2008_06.StructureManagement.SaveBOMWindowsResponse;
-import com.teamcenter.services.strong.cad._2019_06.StructureManagement.CreateWindowsInfo3;
 import com.teamcenter.services.strong.core.DataManagementService;
 import com.teamcenter.services.strong.core.SessionService;
 import com.teamcenter.services.strong.core._2006_03.DataManagement.*;
@@ -28,8 +27,6 @@ import com.teamcenter.services.strong.core._2009_10.DataManagement.GetItemFromAt
 import com.teamcenter.services.strong.core._2010_09.DataManagement.NameValueStruct1;
 import com.teamcenter.services.strong.core._2010_09.DataManagement.PropInfo;
 import com.teamcenter.services.strong.core._2010_09.DataManagement.SetPropertyResponse;
-import com.teamcenter.services.strong.core._2013_05.DataManagement.GenerateNextValuesIn;
-import com.teamcenter.services.strong.core._2013_05.DataManagement.GenerateNextValuesResponse;
 import com.teamcenter.services.strong.core._2015_07.DataManagement.CreateIn2;
 import com.teamcenter.services.strong.importexport.FileImportExportService;
 import com.teamcenter.services.strong.importexport._2011_06.FileImportExport.ExportToApplicationInputData2;
@@ -114,13 +111,6 @@ public class TcUtil {
      * Workflow Service
      */
     private final WorkflowService wfService;
-
-    /**
-     * Session information response, used to get current session info without calling getTCSessionInfo repeatedly
-     */
-    private GetTCSessionInfoResponse sessionInfoResponse;
-
-
     /**
      * Transient file directory, read from TC Preference: "Transient_Volume_RootDir"
      */
@@ -135,6 +125,10 @@ public class TcUtil {
      * TODO: separator in linux?
      */
     private final String TRANSIENT_SEPARATOR = "%3b%5c";
+    /**
+     * Session information response, used to get current session info without calling getTCSessionInfo repeatedly
+     */
+    private GetTCSessionInfoResponse sessionInfoResponse;
 
     public TcUtil(Connection connection) {
         // this.fmUtil = new FileManagementUtility(connection);
@@ -510,27 +504,27 @@ public class TcUtil {
      * @param itemRevision target item revision
      * @return an Optional containing the BOM if successful, otherwise an empty Optional
      */
-    public Optional<CreateBOMWindowsOutput> getBOM(ItemRevision itemRevision) {
-        CreateWindowsInfo3[] inputs = new CreateWindowsInfo3[1];
-        inputs[0] = new CreateWindowsInfo3();
-        getPSBOMView(itemRevision).ifPresent(psbomView -> inputs[0].bomView = psbomView);
-        inputs[0].itemRev = itemRevision;
-        CreateBOMWindowsResponse response = smService.createOrReConfigureBOMWindows(inputs);
-        if (catchPartialErrors(response.serviceData) ||
-            response.output == null ||
-            response.output.length == 0) {
-            return Optional.empty();
-        }
-
-        return Optional.ofNullable(response.output[0]);
-    }
+    // public Optional<CreateBOMWindowsOutput> getBOM(ItemRevision itemRevision) {
+    //     CreateWindowsInfo3[] inputs = new CreateWindowsInfo3[1];
+    //     inputs[0] = new CreateWindowsInfo3();
+    //     getPSBOMView(itemRevision).ifPresent(psbomView -> inputs[0].bomView = psbomView);
+    //     inputs[0].itemRev = itemRevision;
+    //     CreateBOMWindowsResponse response = smService.createOrReConfigureBOMWindows(inputs);
+    //     if (catchPartialErrors(response.serviceData) ||
+    //         response.output == null ||
+    //         response.output.length == 0) {
+    //         return Optional.empty();
+    //     }
+    //
+    //     return Optional.ofNullable(response.output[0]);
+    // }
 
     /**
      * Send rev to structure manager and return the top line
      */
-    public Optional<BOMLine> getBOMLine(ItemRevision itemRevision) {
-        return getBOM(itemRevision).map(bom -> bom.bomLine);
-    }
+    // public Optional<BOMLine> getBOMLine(ItemRevision itemRevision) {
+    //     return getBOM(itemRevision).map(bom -> bom.bomLine);
+    // }
 
     /**
      * Get bom line by item revision and rev rule
@@ -539,9 +533,9 @@ public class TcUtil {
      * @param revRule      the rev rule
      * @return an Optional containing the BOM line if successful, otherwise an empty Optional
      */
-    public Optional<BOMLine> getBOMLine(ItemRevision itemRevision, String revRule) {
-        return getBOM(itemRevision, revRule).map(bom -> bom.bomLine);
-    }
+    // public Optional<BOMLine> getBOMLine(ItemRevision itemRevision, String revRule) {
+    //     return getBOM(itemRevision, revRule).map(bom -> bom.bomLine);
+    // }
 
     /**
      * Get bom window by item revision
@@ -549,9 +543,9 @@ public class TcUtil {
      * @param itemRevision the item revision
      * @return an Optional containing the BOM window if successful, otherwise an empty Optional
      */
-    public Optional<BOMWindow> getBOMWindow(ItemRevision itemRevision) {
-        return getBOM(itemRevision).map(bom -> bom.bomWindow);
-    }
+    // public Optional<BOMWindow> getBOMWindow(ItemRevision itemRevision) {
+    //     return getBOM(itemRevision).map(bom -> bom.bomWindow);
+    // }
 
     /**
      * Get bom window by item revision and rev rule
@@ -560,9 +554,9 @@ public class TcUtil {
      * @param revRule      the rev rule
      * @return an Optional containing the BOM window if successful, otherwise an empty Optional
      */
-    public Optional<BOMWindow> getBOMWindow(ItemRevision itemRevision, String revRule) {
-        return getBOM(itemRevision, revRule).map(bom -> bom.bomWindow);
-    }
+    // public Optional<BOMWindow> getBOMWindow(ItemRevision itemRevision, String revRule) {
+    //     return getBOM(itemRevision, revRule).map(bom -> bom.bomWindow);
+    // }
 
     /**
      * Get children bom line
@@ -701,28 +695,28 @@ public class TcUtil {
      * @param rev the item revision
      * @return the next revision id, if failed to get, return an empty Optional
      */
-    public Optional<String> getNextRevId(ItemRevision rev) {
-        GenerateNextValuesIn[] ins = new GenerateNextValuesIn[1];
-        ins[0] = new GenerateNextValuesIn();
-        Map<String, String> additionalInputParams = new HashMap<>();
-        additionalInputParams.put("sourceObject", rev.getUid());
-        ins[0].additionalInputParams = additionalInputParams;
-        ins[0].businessObjectName = getPropStringValue(rev, "object_type").orElseThrow(
-                () -> new SoaUtilException("object_type is not present"));
-        ins[0].operationType = 2; // revise
-        Map<String, String> propertyNameWithSelectedPattern = new HashMap<>();
-        propertyNameWithSelectedPattern.put("item_revision_id", "");
-        ins[0].propertyNameWithSelectedPattern = propertyNameWithSelectedPattern;
-        GenerateNextValuesResponse response = dmService.generateNextValues(ins);
-        if (catchPartialErrors(response.data) || response.generatedValues == null ||
-            response.generatedValues.length == 0 || response.generatedValues[0] == null ||
-            response.generatedValues[0].generatedValues.isEmpty() ||
-            !response.generatedValues[0].generatedValues.containsKey("item_revision_id")) {
-            return Optional.empty();
-        }
-
-        return Optional.ofNullable(response.generatedValues[0].generatedValues.get("item_revision_id").nextValue);
-    }
+    // public Optional<String> getNextRevId(ItemRevision rev) {
+    //     GenerateNextValuesIn[] ins = new GenerateNextValuesIn[1];
+    //     ins[0] = new GenerateNextValuesIn();
+    //     Map<String, String> additionalInputParams = new HashMap<>();
+    //     additionalInputParams.put("sourceObject", rev.getUid());
+    //     ins[0].additionalInputParams = additionalInputParams;
+    //     ins[0].businessObjectName = getPropStringValue(rev, "object_type").orElseThrow(
+    //             () -> new SoaUtilException("object_type is not present"));
+    //     ins[0].operationType = 2; // revise
+    //     Map<String, String> propertyNameWithSelectedPattern = new HashMap<>();
+    //     propertyNameWithSelectedPattern.put("item_revision_id", "");
+    //     ins[0].propertyNameWithSelectedPattern = propertyNameWithSelectedPattern;
+    //     GenerateNextValuesResponse response = dmService.generateNextValues(ins);
+    //     if (catchPartialErrors(response.data) || response.generatedValues == null ||
+    //         response.generatedValues.length == 0 || response.generatedValues[0] == null ||
+    //         response.generatedValues[0].generatedValues.isEmpty() ||
+    //         !response.generatedValues[0].generatedValues.containsKey("item_revision_id")) {
+    //         return Optional.empty();
+    //     }
+    //
+    //     return Optional.ofNullable(response.generatedValues[0].generatedValues.get("item_revision_id").nextValue);
+    // }
 
     /**
      * Get not baseline latest released revision for specific item and release status.
@@ -1422,21 +1416,21 @@ public class TcUtil {
      * @param rev the item revision to be revised
      * @return the new item revision after revise, if failed to revise, return an empty Optional
      */
-    public Optional<ItemRevision> revise(ItemRevision rev) {
-        ReviseInfo[] infos = new ReviseInfo[1];
-        infos[0] = new ReviseInfo();
-        infos[0].clientId = "soa";
-        infos[0].baseItemRevision = rev;
-        infos[0].newRevId = getNextRevId(rev).orElseThrow(() -> new SoaUtilException("Failed in getNextId"));
-
-        ReviseResponse2 response = dmService.revise2(infos);
-        if (catchPartialErrors(response.serviceData) || response.reviseOutputMap.isEmpty() ||
-            !response.reviseOutputMap.containsKey("soa")) {
-            return Optional.empty();
-        }
-
-        return Optional.ofNullable(response.reviseOutputMap.get("soa").newItemRev);
-    }
+    // public Optional<ItemRevision> revise(ItemRevision rev) {
+    //     ReviseInfo[] infos = new ReviseInfo[1];
+    //     infos[0] = new ReviseInfo();
+    //     infos[0].clientId = "soa";
+    //     infos[0].baseItemRevision = rev;
+    //     infos[0].newRevId = getNextRevId(rev).orElseThrow(() -> new SoaUtilException("Failed in getNextId"));
+    //
+    //     ReviseResponse2 response = dmService.revise2(infos);
+    //     if (catchPartialErrors(response.serviceData) || response.reviseOutputMap.isEmpty() ||
+    //         !response.reviseOutputMap.containsKey("soa")) {
+    //         return Optional.empty();
+    //     }
+    //
+    //     return Optional.ofNullable(response.reviseOutputMap.get("soa").newItemRev);
+    // }
 
     /**
      * Save bom window
@@ -1587,24 +1581,24 @@ public class TcUtil {
      * @param revRule      the rev rule
      * @return the bom, if failed to get, return an empty Optional
      */
-    private Optional<CreateBOMWindowsOutput> getBOM(ItemRevision itemRevision, String revRule) {
-        CreateWindowsInfo3[] inputs = new CreateWindowsInfo3[1];
-        inputs[0] = new CreateWindowsInfo3();
-        getPSBOMView(itemRevision).ifPresent(psbomView -> inputs[0].bomView = psbomView);
-        inputs[0].itemRev = itemRevision;
-        RevisionRuleConfigInfo revRuleConfigInfo = new RevisionRuleConfigInfo();
-        revRuleConfigInfo.revRule = getRevisionRule(revRule).orElseThrow(
-                () -> new SoaUtilException("Not found revision rule by name: " + revRule));
-        inputs[0].revRuleConfigInfo = revRuleConfigInfo;
-        CreateBOMWindowsResponse response = smService.createOrReConfigureBOMWindows(inputs);
-        if (catchPartialErrors(response.serviceData) ||
-            response.output == null ||
-            response.output.length == 0) {
-            return Optional.empty();
-        }
-
-        return Optional.ofNullable(response.output[0]);
-    }
+    // private Optional<CreateBOMWindowsOutput> getBOM(ItemRevision itemRevision, String revRule) {
+    //     CreateWindowsInfo3[] inputs = new CreateWindowsInfo3[1];
+    //     inputs[0] = new CreateWindowsInfo3();
+    //     getPSBOMView(itemRevision).ifPresent(psbomView -> inputs[0].bomView = psbomView);
+    //     inputs[0].itemRev = itemRevision;
+    //     RevisionRuleConfigInfo revRuleConfigInfo = new RevisionRuleConfigInfo();
+    //     revRuleConfigInfo.revRule = getRevisionRule(revRule).orElseThrow(
+    //             () -> new SoaUtilException("Not found revision rule by name: " + revRule));
+    //     inputs[0].revRuleConfigInfo = revRuleConfigInfo;
+    //     CreateBOMWindowsResponse response = smService.createOrReConfigureBOMWindows(inputs);
+    //     if (catchPartialErrors(response.serviceData) ||
+    //         response.output == null ||
+    //         response.output.length == 0) {
+    //         return Optional.empty();
+    //     }
+    //
+    //     return Optional.ofNullable(response.output[0]);
+    // }
 
     /**
      * Set release status
