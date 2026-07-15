@@ -58,4 +58,17 @@ class TcUtilTest extends UtilTest {
         }
     }
 
+    @Test
+    void whereReferenced() {
+        ItemRevision revision = (ItemRevision) tcUtil.findMoByUid("uniFAAi1o0c12D").get();
+        Optional<ModelObject[]> refOpt = tcUtil.whereReferenced(revision, 1);
+        if (refOpt.isPresent()) {
+            ModelObject[] revs = refOpt.get();
+            for (ModelObject rev : revs) {
+                String name = tcUtil.getPropStringValue(rev, "object_name").get();
+                System.out.println("name = " + name);
+            }
+        }
+    }
+
 }

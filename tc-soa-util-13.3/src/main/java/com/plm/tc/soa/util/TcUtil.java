@@ -20,6 +20,7 @@ import com.teamcenter.services.strong.core.SessionService;
 import com.teamcenter.services.strong.core._2006_03.DataManagement.*;
 import com.teamcenter.services.strong.core._2006_03.Session;
 import com.teamcenter.services.strong.core._2007_01.DataManagement.GetItemFromIdPref;
+import com.teamcenter.services.strong.core._2007_01.DataManagement.WhereReferencedResponse;
 import com.teamcenter.services.strong.core._2007_01.Session.GetTCSessionInfoResponse;
 import com.teamcenter.services.strong.core._2007_12.Session.StateNameValue;
 import com.teamcenter.services.strong.core._2008_06.DataManagement.*;
@@ -156,7 +157,6 @@ public class TcUtil {
         this.sqService = SavedQueryService.getService(connection);
         this.structureService = StructureService.getService(connection);
         this.wfService = WorkflowService.getService(connection);
-
     }
 
     /**
@@ -1553,6 +1553,15 @@ public class TcUtil {
         SetPropertyResponse response = dmService.setProperties(infos, new String[]{});
 
         return !catchPartialErrors(response.data);
+    }
+
+    public Optional<ModelObject[]> whereReferenced(WorkspaceObject obj, int level) {
+        WhereReferencedResponse response = dmService.whereReferenced(new WorkspaceObject[]{obj}, level);
+        if (catchPartialErrors(response.serviceData)) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(getPlainObjects(response.serviceData));
     }
 
     public Optional<ModelObject[]> whereUsed(WorkspaceObject obj, int level) {
