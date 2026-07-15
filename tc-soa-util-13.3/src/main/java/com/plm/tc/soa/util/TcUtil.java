@@ -60,17 +60,21 @@ import com.teamcenter.soa.client.model.Property;
 import com.teamcenter.soa.client.model.ServiceData;
 import com.teamcenter.soa.client.model.strong.*;
 import com.teamcenter.soa.exceptions.NotLoadedException;
-import lombok.extern.slf4j.Slf4j;
+import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.Map.Entry;
 
-@Slf4j
 @SuppressWarnings({"unused", "OptionalGetWithoutIsPresent", "UnusedReturnValue", "SameParameterValue",
                    "FieldCanBeLocal"})
 public class TcUtil {
+
+    @Setter
+    private Logger log = LoggerFactory.getLogger(TcUtil.class);
 
     // private final FileManagementUtility fmUtil;
 
@@ -1574,7 +1578,6 @@ public class TcUtil {
 
         return Optional.ofNullable(getPlainObjects(response.serviceData));
     }
-
 
     /**
      * Catch partial errors
