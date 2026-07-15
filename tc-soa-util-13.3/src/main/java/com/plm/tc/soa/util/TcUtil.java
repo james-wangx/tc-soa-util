@@ -28,6 +28,9 @@ import com.teamcenter.services.strong.core._2009_10.DataManagement.GetItemFromAt
 import com.teamcenter.services.strong.core._2010_09.DataManagement.NameValueStruct1;
 import com.teamcenter.services.strong.core._2010_09.DataManagement.PropInfo;
 import com.teamcenter.services.strong.core._2010_09.DataManagement.SetPropertyResponse;
+import com.teamcenter.services.strong.core._2012_02.DataManagement.WhereUsedConfigParameters;
+import com.teamcenter.services.strong.core._2012_02.DataManagement.WhereUsedInputData;
+import com.teamcenter.services.strong.core._2012_02.DataManagement.WhereUsedResponse;
 import com.teamcenter.services.strong.core._2013_05.DataManagement.GenerateNextValuesIn;
 import com.teamcenter.services.strong.core._2013_05.DataManagement.GenerateNextValuesResponse;
 import com.teamcenter.services.strong.core._2015_07.DataManagement.CreateIn2;
@@ -60,6 +63,7 @@ import com.teamcenter.soa.exceptions.NotLoadedException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -790,6 +794,19 @@ public class TcUtil {
                 () -> new SoaUtilException("items_tag is not present"));
 
         return getNotBaselineLatestReleasedRev((Item) item, statusName);
+    }
+
+    public ModelObject[] getPlainObjects(ServiceData serviceData) {
+        int plain = serviceData.sizeOfPlainObjects();
+        ModelObject[] plainObjects = new ModelObject[plain];
+        if (plain == 0) {
+            return null;
+        } else {
+            for (int i = 0; i < plain; ++i) {
+                plainObjects[i] = serviceData.getPlainObject(i);
+            }
+            return plainObjects;
+        }
     }
 
     /**
@@ -1533,6 +1550,31 @@ public class TcUtil {
 
         return !catchPartialErrors(response.data);
     }
+
+    public Optional<ModelObject[]> whereUsed(WorkspaceObject obj, int level) {
+        WhereUsedInputData[] inputDates = new WhereUsedInputData[1];
+        inputDates[0] = new WhereUsedInputData();
+        inputDates[0].inputObject = obj;
+        WhereUsedConfigParameters parameters = new WhereUsedConfigParameters();
+        inputDates[0].inputParams = parameters;
+        Map<String, BigInteger> intMap = new HashMap<>();
+        intMap.put("numLevels", BigInteger.valueOf(level));
+        Map<String, Boolean> boolMap = new HashMap<>();
+        boolMap.put("whereUsedPreciseFlag", false);
+        Map<String, ModelObject> tagMap = new HashMap<>();
+        tagMap.put("revision_rule", null);
+        parameters.intMap = intMap;
+        parameters.boolMap = boolMap;
+        parameters.tagMap = tagMap;
+        WhereUsedResponse response = dmService.whereUsed(inputDates, parameters);
+
+        if (catchPartialErrors(response.serviceData) || response.output == null || response.output.length == 0) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(getPlainObjects(response.serviceData));
+    }
+
 
     /**
      * Catch partial errors

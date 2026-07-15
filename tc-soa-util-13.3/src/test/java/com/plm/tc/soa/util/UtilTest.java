@@ -20,7 +20,7 @@ class UtilTest {
         // Login use tccs
         // SessionUtil.login("tccs://TcWeb1", "james", "james", "zh_CN", "tc-soa-util-test");
         tcUtil = new TcUtil(session.getConnection());
-        // tcUtil.login("00001", "00001", "zh_CN", "tc-soa-util-test");
+        tcUtil.login("infodba", "infodba", "zh_CN", "tc-soa-util-test");
     }
 
     @AfterAll

@@ -2,6 +2,8 @@ package com.plm.tc.soa.util;
 
 import com.teamcenter.services.strong.core._2006_03.DataManagement.ItemProperties;
 import com.teamcenter.soa.client.model.ModelObject;
+import com.teamcenter.soa.client.model.strong.Item;
+import com.teamcenter.soa.client.model.strong.ItemRevision;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -32,21 +34,28 @@ class TcUtilTest extends UtilTest {
 
     @Test
     void test() {
-        String queryName = "Item...";
-        String[] queryEntries = new String[]{"名称", "类型"};
-        String[] queryValues = new String[]{"Test", "CPGC-产品零部件"};
-        // log.info("Execute query: {}, entries: {}, values: {}", queryName, queryEntries, queryValues);
-        Optional<ModelObject> resOpt = tcUtil.queryOneObject(queryName, queryEntries, queryValues);
-        if (resOpt.isPresent()) {
-            System.out.println("Found object for object name Test: " + resOpt.get().getUid());
-        } else {
-            System.out.println("No object found for object name Test");
-        }
+        ItemProperties itemProperties = new ItemProperties();
+        itemProperties.type = "U2_Item";
+        itemProperties.name = "tc-soa-util-test";
+        Optional<Item> item = tcUtil.createItem(itemProperties, null, null);
     }
 
     @Test
     void deleteRelation() {
 
+    }
+
+    @Test
+    void whereUsed() {
+        ItemRevision revision = (ItemRevision) tcUtil.findMoByUid("uniFAAi1o0c12D").get();
+        Optional<ModelObject[]> usedOpt = tcUtil.whereUsed(revision, 1);
+        if (usedOpt.isPresent()) {
+            ModelObject[] revs = usedOpt.get();
+            for (ModelObject rev : revs) {
+                String itemId = tcUtil.getPropStringValue(rev, "item_id").get();
+                System.out.println("itemId = " + itemId);
+            }
+        }
     }
 
 }
