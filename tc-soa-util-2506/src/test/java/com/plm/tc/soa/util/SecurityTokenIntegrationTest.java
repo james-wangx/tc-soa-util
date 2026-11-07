@@ -67,10 +67,9 @@ class SecurityTokenIntegrationTest {
             assertNotNull(response.user, "Password login did not return a user.");
             assertNoPartialErrors(response.serviceData);
 
-            com.teamcenter.services.internal.strong.core.SessionService internalSessionService =
-                    com.teamcenter.services.internal.strong.core.SessionService.getService(
-                            sourceSession.getConnection());
-            return internalSessionService.getSecurityToken(TOKEN_DURATION_SECONDS);
+            return new TcUtil(sourceSession.getConnection())
+                    .getSecurityToken(TOKEN_DURATION_SECONDS)
+                    .orElseThrow(() -> new IllegalStateException("Failed to obtain security token."));
         } finally {
             if (sourceLoginCompleted) {
                 logout(sourceSessionService);

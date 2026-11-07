@@ -13,7 +13,7 @@ Chinese version: [README.zh-CN.md](README.zh-CN.md)
 `SecurityTokenIntegrationTest` verifies the Teamcenter session handoff flow:
 
 1. Log in with a user name and password.
-2. Obtain a short-lived security token.
+2. Obtain a short-lived security token with `TcUtil#getSecurityToken(int)`.
 3. Log out the session that issued the token.
 4. Log in to a new session with the token.
 5. Log out the token session.

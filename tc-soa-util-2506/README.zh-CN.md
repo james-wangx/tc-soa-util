@@ -13,7 +13,7 @@ Maven 版本：2506.2611.01
 `SecurityTokenIntegrationTest` 用于验证 Teamcenter 的会话交接流程：
 
 1. 使用用户名和密码登录。
-2. 获取短时有效的 Security Token。
+2. 通过 `TcUtil#getSecurityToken(int)` 获取短时有效的 Security Token。
 3. 注销签发 Token 的原会话。
 4. 使用 Security Token 建立新会话。
 5. 注销 Token 会话。
