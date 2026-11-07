@@ -2,6 +2,25 @@
 
 Teamcenter SOA Utilities
 
+## Modules
+
+All modules share the same Maven artifact ID and are distinguished by their Teamcenter-compatible versions.
+
+| Module | Teamcenter version | Maven version |
+| --- | --- | --- |
+| `tc-soa-util-11.2` | 11.2 | `11.2.2611.01` |
+| `tc-soa-util-13.3` | 13.3 | `13.3.2611.01` |
+| `tc-soa-util-2506` | 2506 | `2506.2611.01` |
+| `tc-soa-util-2512` | 2512 | `2512.2611.01` |
+
+Dependency coordinates:
+
+```xml
+<groupId>com.plm.tc.soa</groupId>
+<artifactId>tc-soa-util</artifactId>
+<version>2512.2611.01</version>
+```
+
 ## Install dependencies
 
 Install Teamcenter SOA java dependencies into the Maven repository.

@@ -5,8 +5,8 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.plm.tc.soa</groupId>
-  <artifactId>tc-soa-util-11.2</artifactId>
-  <version>1.0</version>
+  <artifactId>tc-soa-util</artifactId>
+  <version>11.2.2611.01</version>
 
   <properties>
     <maven.compiler.source>8</maven.compiler.source>
