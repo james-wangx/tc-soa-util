@@ -13,8 +13,6 @@ public class AppXExceptionHandler implements ExceptionHandler {
 
     public void handleException(InternalServerException ise) {
         String message = ise.getMessage() == null ? "" : ise.getMessage();
-        log.error("Exception caught in {}.handleException(InternalServerException).",
-                  this.getClass().getName(), ise);
 
         if (ise instanceof ConnectionException ||
             ise instanceof ProtocolException ||
@@ -24,12 +22,8 @@ public class AppXExceptionHandler implements ExceptionHandler {
             // ConnectionException are typically due to a network error (server down .etc.)
             throw new SoaConnException(message, ise);
         } else {
-            log.warn("The server returned an internal server error.\n" +
-                     "{}\n" +
-                     "This is most likely the result of a programming error.\n" +
-                     "A RuntimeException will be thrown.",
-                     ise.getMessage());
-            throw new RuntimeException(ise.getMessage());
+            log.debug("Propagating Teamcenter SOA internal server exception.", ise);
+            throw new RuntimeException(message, ise);
         }
     }
 
@@ -41,8 +35,7 @@ public class AppXExceptionHandler implements ExceptionHandler {
      * @param coe the CanceledOperationException to handle
      */
     public void handleException(CanceledOperationException coe) {
-        log.error("Exception caught in {}.handleException(CanceledOperationException).",
-                  this.getClass().getName(), coe);
+        log.debug("Propagating canceled Teamcenter SOA operation.", coe);
 
         // Expecting this from the login tests with bad credentials,
         // and the AnyUserCredentials class not prompting for different credentials
