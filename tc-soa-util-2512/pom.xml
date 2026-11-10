@@ -17,7 +17,9 @@
     <junit.version>5.11.3</junit.version>
 
     <tc.version>2512</tc.version>
-    <log4j.version>2.17.1</log4j.version>
+    <log4j.version>2.25.5</log4j.version>
+    <jspecify.version>1.0.0</jspecify.version>
+    <slf4j.version>2.0.20</slf4j.version>
     <jaxb-api.version>2.3.1</jaxb-api.version>
     <jaxb-runtime.version>2.3.5</jaxb-runtime.version>
     <httpclient.version>4.5.13</httpclient.version>
@@ -42,8 +44,18 @@
     <!-- teamcenter dependencies -->
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-slf4j-impl</artifactId>
+      <artifactId>log4j-core</artifactId>
       <version>${log4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jspecify</groupId>
+      <artifactId>jspecify</artifactId>
+      <version>${jspecify.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

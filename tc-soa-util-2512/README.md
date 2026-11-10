@@ -11,9 +11,10 @@ Maven artifact version: 2512.2611.01
 ## Dependency packaging
 
 Applications only need to declare the `tc-soa-util` dependency. The utility
-artifact bundles the Teamcenter-compatible JAXB 2.3 runtime and does not
-propagate a logging implementation. This keeps Spring Boot consumer projects
-from adding JAXB version overrides or logging exclusions.
+artifact bundles the Teamcenter-compatible JAXB 2.3 runtime, exposes the
+`log4j-core` runtime required by the Teamcenter SOA client, and registers a
+high-priority Log4j provider. This keeps Spring Boot consumer projects from
+adding JAXB version overrides, logging exclusions, or provider configuration.
 
 ## Security token integration test
 
