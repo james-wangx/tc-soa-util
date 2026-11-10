@@ -14,6 +14,7 @@ Maven 制品版本：2512.2611.01
 Teamcenter 兼容的 JAXB 2.3 运行库，对外提供 Teamcenter SOA 客户端所需的
 `log4j-core`，并注册高优先级 Log4j Provider。因此 Spring Boot 业务工程
 不需要额外配置 JAXB 版本、日志排除项或 Provider。
+默认 SOA 异常处理器还会记录完整异常栈，便于业务服务返回经过脱敏的具体根因。
 
 ## Security Token 集成测试
 

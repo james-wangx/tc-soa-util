@@ -6,4 +6,7 @@ public class SoaConnException extends RuntimeException {
         super(message);
     }
 
+    public SoaConnException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

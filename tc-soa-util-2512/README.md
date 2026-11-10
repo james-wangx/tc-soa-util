@@ -15,6 +15,8 @@ artifact bundles the Teamcenter-compatible JAXB 2.3 runtime, exposes the
 `log4j-core` runtime required by the Teamcenter SOA client, and registers a
 high-priority Log4j provider. This keeps Spring Boot consumer projects from
 adding JAXB version overrides, logging exclusions, or provider configuration.
+The default SOA exception handler also logs the complete exception stack so
+consumer services can expose a meaningful, sanitized root cause.
 
 ## Security token integration test
 

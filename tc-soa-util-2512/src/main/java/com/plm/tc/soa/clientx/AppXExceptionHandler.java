@@ -12,15 +12,17 @@ import lombok.extern.slf4j.Slf4j;
 public class AppXExceptionHandler implements ExceptionHandler {
 
     public void handleException(InternalServerException ise) {
-        log.error("Exception caught in {}.handleException(InternalServerException).", this.getClass().getName());
+        String message = ise.getMessage() == null ? "" : ise.getMessage();
+        log.error("Exception caught in {}.handleException(InternalServerException).",
+                  this.getClass().getName(), ise);
 
         if (ise instanceof ConnectionException ||
             ise instanceof ProtocolException ||
-            ise.getMessage().contains("未能获得服务器指派") ||
-            ise.getMessage().contains("No response received") ||
-            ise.getMessage().contains("Exception in ServerAccess for user")) {
+            message.contains("未能获得服务器指派") ||
+            message.contains("No response received") ||
+            message.contains("Exception in ServerAccess for user")) {
             // ConnectionException are typically due to a network error (server down .etc.)
-            throw new SoaConnException(ise.getMessage());
+            throw new SoaConnException(message, ise);
         } else {
             log.warn("The server returned an internal server error.\n" +
                      "{}\n" +
@@ -39,7 +41,8 @@ public class AppXExceptionHandler implements ExceptionHandler {
      * @param coe the CanceledOperationException to handle
      */
     public void handleException(CanceledOperationException coe) {
-        log.error("Exception caught in {}.handleException(CanceledOperationException).", this.getClass().getName());
+        log.error("Exception caught in {}.handleException(CanceledOperationException).",
+                  this.getClass().getName(), coe);
 
         // Expecting this from the login tests with bad credentials,
         // and the AnyUserCredentials class not prompting for different credentials
