@@ -153,8 +153,8 @@
   <build>
     <plugins>
       <!--
-        Bundle the Teamcenter-compatible JAXB 2.3 runtime into this artifact so
-        consuming applications only need to declare one tc-soa-util dependency.
+        Bundle the Java EE JAXB 2.3 runtime into this artifact so consuming
+        applications only need one tc-soa-util dependency.
       -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

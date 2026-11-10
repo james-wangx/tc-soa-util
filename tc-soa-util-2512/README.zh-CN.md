@@ -11,10 +11,22 @@ Maven 制品版本：2512.2611.01
 ## 依赖打包
 
 业务工程只需要引入 `tc-soa-util` 一个依赖。工具库制品内部已经打包
-Teamcenter 兼容的 JAXB 2.3 运行库，对外提供 Teamcenter SOA 客户端所需的
-`log4j-core`，并注册高优先级 Log4j Provider。因此 Spring Boot 业务工程
-不需要额外配置 JAXB 版本、日志排除项或 Provider。
+Java EE JAXB 2.3 运行库，并注册 Teamcenter SOA 客户端所需的 Log4j Provider。
 默认 SOA 异常处理器还会记录完整异常栈，便于业务服务返回经过脱敏的具体根因。
+
+### Log4j 兼容性
+
+| 运行环境 | Log4j API / Core |
+| --- | --- |
+| Teamcenter 2512 `soa_client/java/libs` | `2.17.1` |
+| 配合 Spring Boot 4 的 `tc-soa-util` | `2.25.5` |
+
+Teamcenter 独立 SOA 介质使用 `2.17.1`，但这套完整 Log4j 与 Spring Boot 4
+共享的 Log4j API 不兼容。`log4j-core 2.17.1` 搭配 API `2.25.5` 会报
+`NoSuchMethodError: LoaderUtil.getClassLoaders()`。因此 util 在 Spring Boot
+进程内使用兼容的 `2.25.5` API/Core，并注册所需的 Core Provider。消费方可通过
+`mvn dependency:tree` 查看实际版本，不应降级 Log4j。若必须使用完整 `2.17.1`，
+需要将 Teamcenter 客户端放入独立进程或独立类加载器运行。
 
 ## Security Token 集成测试
 
