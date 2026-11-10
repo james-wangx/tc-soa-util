@@ -96,6 +96,11 @@ public class TcUtil {
     private final SessionService sessionService;
 
     /**
+     * Internal Session Service
+     */
+    private final com.teamcenter.services.internal.strong.core.SessionService internalSessionService;
+
+    /**
      * Structure Management Service
      */
     private final StructureManagementService smService;
@@ -141,6 +146,8 @@ public class TcUtil {
                 connection);
         this.pmService = PreferenceManagementService.getService(connection);
         this.sessionService = SessionService.getService(connection);
+        this.internalSessionService =
+                com.teamcenter.services.internal.strong.core.SessionService.getService(connection);
         this.smService = StructureManagementService.getService(connection);
         this.sqService = SavedQueryService.getService(connection);
         this.structureService = StructureService.getService(connection);
@@ -1289,6 +1296,22 @@ public class TcUtil {
         } catch (InvalidCredentialsException e) {
             log.error("Login failed as user '{}'.", username, e);
             return false;
+        }
+    }
+
+    /**
+     * Get a short-lived security token for the current session.
+     *
+     * @param durationSeconds the token lifetime in seconds
+     * @return the security token, or an empty Optional if it cannot be obtained
+     */
+    public Optional<String> getSecurityToken(int durationSeconds) {
+        try {
+            return Optional.ofNullable(internalSessionService.getSecurityToken(durationSeconds))
+                           .filter(token -> !token.isBlank());
+        } catch (ServiceException e) {
+            log.error("Failed to obtain security token.", e);
+            return Optional.empty();
         }
     }
 

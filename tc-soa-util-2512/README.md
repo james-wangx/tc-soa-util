@@ -1,7 +1,26 @@
 # tc-soa-util
 
+Chinese documentation: [README.zh-CN.md](README.zh-CN.md)
+
 Teamcenter SOA Util
 
 Teamcenter version: 2512
 
 Maven artifact version: 2512.2611.01
+
+## Security token integration test
+
+`SecurityTokenIntegrationTest` verifies the Teamcenter session handoff flow:
+
+1. Log in with a Teamcenter username and password.
+2. Obtain a short-lived security token with `TcUtil#getSecurityToken(int)`.
+3. Log out the password-authenticated session immediately.
+4. Log in with the same username and the security token as the password.
+5. Log out the token-authenticated session.
+
+Set `TC_URL`, `TC_USERNAME`, `TC_PASSWORD`, and optionally `TC_LOCALE` to run
+the integration test against a Teamcenter environment:
+
+```powershell
+mvn -Dtest=SecurityTokenIntegrationTest test
+```
