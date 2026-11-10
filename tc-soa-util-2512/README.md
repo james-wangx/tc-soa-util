@@ -15,6 +15,8 @@ artifact bundles the Java EE JAXB 2.3 runtime and registers the Log4j provider
 required by the Teamcenter SOA client.
 The default SOA exception handler also logs the complete exception stack so
 consumer services can expose a meaningful, sanitized root cause.
+The utility does not bundle an auto-discovered `log4j2.properties`; the
+consuming application owns Log4j configuration and appenders.
 
 ### Log4j compatibility
 

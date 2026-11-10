@@ -13,6 +13,8 @@ Maven 制品版本：2512.2611.01
 业务工程只需要引入 `tc-soa-util` 一个依赖。工具库制品内部已经打包
 Java EE JAXB 2.3 运行库，并注册 Teamcenter SOA 客户端所需的 Log4j Provider。
 默认 SOA 异常处理器还会记录完整异常栈，便于业务服务返回经过脱敏的具体根因。
+工具库不携带会被自动发现的 `log4j2.properties`，Log4j 配置和 Appender 由
+消费工程统一维护。
 
 ### Log4j 兼容性
 
