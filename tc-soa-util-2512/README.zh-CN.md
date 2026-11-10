@@ -8,6 +8,12 @@ Teamcenter 版本：2512
 
 Maven 制品版本：2512.2611.01
 
+## 依赖打包
+
+业务工程只需要引入 `tc-soa-util` 一个依赖。工具库制品内部已经打包
+Teamcenter 兼容的 JAXB 2.3 运行库，并且不会向外传递日志实现，因此 Spring
+Boot 业务工程不需要额外配置 JAXB 版本或日志排除项。
+
 ## Security Token 集成测试
 
 `SecurityTokenIntegrationTest` 用于验证 Teamcenter 的会话交接流程：

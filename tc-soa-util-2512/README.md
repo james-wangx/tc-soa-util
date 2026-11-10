@@ -8,6 +8,13 @@ Teamcenter version: 2512
 
 Maven artifact version: 2512.2611.01
 
+## Dependency packaging
+
+Applications only need to declare the `tc-soa-util` dependency. The utility
+artifact bundles the Teamcenter-compatible JAXB 2.3 runtime and does not
+propagate a logging implementation. This keeps Spring Boot consumer projects
+from adding JAXB version overrides or logging exclusions.
+
 ## Security token integration test
 
 `SecurityTokenIntegrationTest` verifies the Teamcenter session handoff flow:

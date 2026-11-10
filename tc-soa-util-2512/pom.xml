@@ -138,4 +138,52 @@
     </dependency>
   </dependencies>
 
+  <build>
+    <plugins>
+      <!--
+        Bundle the Teamcenter-compatible JAXB 2.3 runtime into this artifact so
+        consuming applications only need to declare one tc-soa-util dependency.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.6.1</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <createDependencyReducedPom>true</createDependencyReducedPom>
+              <dependencyReducedPomLocation>
+                ${project.build.directory}/dependency-reduced-pom.xml
+              </dependencyReducedPomLocation>
+              <useDependencyReducedPomInJar>true</useDependencyReducedPomInJar>
+              <artifactSet>
+                <includes>
+                  <include>javax.xml.bind:jaxb-api</include>
+                  <include>org.glassfish.jaxb:jaxb-runtime</include>
+                  <include>org.glassfish.jaxb:txw2</include>
+                  <include>com.sun.istack:istack-commons-runtime</include>
+                  <include>com.sun.activation:jakarta.activation</include>
+                </includes>
+              </artifactSet>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>
