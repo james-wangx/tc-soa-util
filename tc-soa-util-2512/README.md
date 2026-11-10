@@ -6,13 +6,13 @@ Teamcenter SOA Util
 
 Teamcenter version: 2512
 
-Maven artifact version: 2512.2611.01
+Maven artifact version: 2512.2611.02
 
 ## Dependency packaging
 
 Applications only need to declare the `tc-soa-util` dependency. The utility
-artifact bundles the Java EE JAXB 2.3 runtime and registers the Log4j provider
-required by the Teamcenter SOA client.
+artifact bundles the Java EE JAXB 2.3 runtime and uses the standard Log4j Core
+provider supplied by the consuming application's Log4j2 runtime.
 The default SOA exception handler also logs the complete exception stack so
 consumer services can expose a meaningful, sanitized root cause.
 The utility does not bundle an auto-discovered `log4j2.properties`; the
@@ -29,8 +29,8 @@ Teamcenter's standalone SOA kit ships `2.17.1`, but that complete Log4j stack is
 not binary-compatible with Spring Boot 4's shared Log4j API. Loading Core
 `2.17.1` with API `2.25.5` fails with
 `NoSuchMethodError: LoaderUtil.getClassLoaders()`. The utility therefore uses
-the Spring Boot 4-compatible `2.25.5` API/Core pair in-process and registers the
-required Core provider. Consumers can verify the resolved version with
+the Spring Boot 4-compatible `2.25.5` API/Core pair in-process and uses the
+standard Core provider from Log4j. Consumers can verify the resolved version with
 `mvn dependency:tree`; they must not downgrade the Log4j stack. Exact `2.17.1`
 requires running the Teamcenter client in an isolated process or classloader.
 

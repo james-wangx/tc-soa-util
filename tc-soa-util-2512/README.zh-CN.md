@@ -6,12 +6,13 @@ Teamcenter SOA Util
 
 Teamcenter 版本：2512
 
-Maven 制品版本：2512.2611.01
+Maven 制品版本：2512.2611.02
 
 ## 依赖打包
 
 业务工程只需要引入 `tc-soa-util` 一个依赖。工具库制品内部已经打包
-Java EE JAXB 2.3 运行库，并注册 Teamcenter SOA 客户端所需的 Log4j Provider。
+Java EE JAXB 2.3 运行库，Log4j Provider 使用消费工程 Log4j2 运行时自带的
+标准 Core Provider。
 默认 SOA 异常处理器还会记录完整异常栈，便于业务服务返回经过脱敏的具体根因。
 工具库不携带会被自动发现的 `log4j2.properties`，Log4j 配置和 Appender 由
 消费工程统一维护。
@@ -26,7 +27,7 @@ Java EE JAXB 2.3 运行库，并注册 Teamcenter SOA 客户端所需的 Log4j P
 Teamcenter 独立 SOA 介质使用 `2.17.1`，但这套完整 Log4j 与 Spring Boot 4
 共享的 Log4j API 不兼容。`log4j-core 2.17.1` 搭配 API `2.25.5` 会报
 `NoSuchMethodError: LoaderUtil.getClassLoaders()`。因此 util 在 Spring Boot
-进程内使用兼容的 `2.25.5` API/Core，并注册所需的 Core Provider。消费方可通过
+进程内使用兼容的 `2.25.5` API/Core 和 Log4j 自带的标准 Core Provider。消费方可通过
 `mvn dependency:tree` 查看实际版本，不应降级 Log4j。若必须使用完整 `2.17.1`，
 需要将 Teamcenter 客户端放入独立进程或独立类加载器运行。
 
