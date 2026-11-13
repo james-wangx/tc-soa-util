@@ -1,22 +1,31 @@
 package com.plm.tc.soa.clientx;
 
+import com.plm.tc.soa.util.TcUtil;
 import com.teamcenter.soa.SoaConstants;
 import com.teamcenter.soa.client.Connection;
 import lombok.Getter;
+
+import java.util.Objects;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Function;
 
 /**
  * This class is used to create and hold a single instance of the Connection object that is shared throughout the
  * application.
  */
-@SuppressWarnings("unused")
 public class AppXSharedSession {
+
+    private static final ReentrantLock CALL_LOCK = new ReentrantLock(true);
 
     /**
      * Single instance of the Connection object that is shared throughout the application.
      * This Connection object is needed whenever a Service stub is instantiated.
      */
     @Getter
-    private static Connection connection;
+    private static volatile Connection connection;
+
+    private static volatile AppXCredentialManager sharedCredentialManager;
+    private static volatile TcUtil sharedTcUtil;
 
     /**
      * Create an instance of the Session with a connection to the specified server.
@@ -30,6 +39,7 @@ public class AppXSharedSession {
         // Create an instance of the CredentialManager, this is used by the SOA Framework to get the user's credentials
         // when challenged by the server (session timeout on the web tier).
         AppXCredentialManager credentialManager = new AppXCredentialManager();
+        sharedCredentialManager = credentialManager;
 
         String protocol;
         String envNameTccs = null;
@@ -70,4 +80,68 @@ public class AppXSharedSession {
         // Connection.addRequestListener(new AppXRequestListener());
     }
 
+    /**
+     * Initialize the application-wide service-account session.
+     */
+    public static synchronized void initialize(
+            String host,
+            String username,
+            String password,
+            String group,
+            String role,
+            String locale,
+            String sessionDiscriminator) {
+        if (sharedTcUtil != null) {
+            return;
+        }
+        Objects.requireNonNull(username, "Service-account username is required.");
+        Objects.requireNonNull(password, "Service-account password is required.");
+
+        new AppXSharedSession(host);
+        sharedCredentialManager.setUserPassword(username, password, sessionDiscriminator);
+        sharedCredentialManager.setGroupRole(
+                group == null ? "" : group,
+                role == null ? "" : role);
+        TcUtil candidate = new TcUtil(connection);
+        if (!candidate.login(username, password, group, role, locale, sessionDiscriminator)) {
+            connection = null;
+            throw new IllegalStateException(
+                    "Unable to log in the Teamcenter shared service account '" + username + "'.");
+        }
+        sharedTcUtil = candidate;
+    }
+
+    /**
+     * Execute an operation on the shared connection. Calls are serialized
+     * because the Teamcenter connection holds mutable client-side model state.
+     */
+    public static <T> T execute(Function<TcUtil, T> operation) {
+        CALL_LOCK.lock();
+        try {
+            TcUtil tcUtil = sharedTcUtil;
+            if (tcUtil == null) {
+                throw new IllegalStateException("Teamcenter shared session is not initialized.");
+            }
+            return operation.apply(tcUtil);
+        } finally {
+            CALL_LOCK.unlock();
+        }
+    }
+
+    /**
+     * Log out and clear the shared session.
+     */
+    public static void close() {
+        CALL_LOCK.lock();
+        try {
+            if (sharedTcUtil != null) {
+                sharedTcUtil.logout();
+            }
+        } finally {
+            sharedTcUtil = null;
+            sharedCredentialManager = null;
+            connection = null;
+            CALL_LOCK.unlock();
+        }
+    }
 }

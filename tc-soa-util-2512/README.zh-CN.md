@@ -2,11 +2,22 @@
 
 英文主文档：[README.md](README.md)
 
+源码仓库：[https://github.com/james-wangx/tc-soa-util](https://github.com/james-wangx/tc-soa-util)
+
 Teamcenter SOA Util
 
 Teamcenter 版本：2512
 
-Maven 制品版本：2512.2611.02
+Maven 制品版本：2512.2611.03
+
+## 服务账号全局会话
+
+`AppXSharedSession` 持有一个进程级 Teamcenter Connection。应用启动时使用服务
+账号初始化，并通过 `AppXSharedSession.execute(...)` 执行共享操作；由于
+Teamcenter Connection 内含可变的客户端状态，所有调用必须串行执行。
+
+共享会话只用于不需要模拟目标用户身份的操作。签发用户登录 Token 等操作仍需
+独立用户会话；为某个用户创建对象后，必须完成所有权转移再返回。
 
 ## 依赖打包
 
@@ -47,3 +58,8 @@ Teamcenter 环境运行集成测试：
 ```powershell
 mvn -Dtest=SecurityTokenIntegrationTest test
 ```
+
+`SharedSessionPasswordChangeIntegrationTest` 用于验证服务账号共享会话可以在
+两次操作之间不重新登录的情况下修改并恢复测试用户密码。除 `TC_URL` 外，还需
+设置 `TC_SERVICE_USERNAME`、`TC_SERVICE_PASSWORD`、`TC_TARGET_USERNAME`
+和 `TC_TARGET_PASSWORD`。

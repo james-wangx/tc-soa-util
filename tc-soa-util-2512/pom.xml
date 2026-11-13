@@ -6,7 +6,7 @@
 
   <groupId>com.plm.tc.soa</groupId>
   <artifactId>tc-soa-util</artifactId>
-  <version>2512.2611.02</version>
+  <version>2512.2611.03</version>
 
   <properties>
     <maven.compiler.source>21</maven.compiler.source>

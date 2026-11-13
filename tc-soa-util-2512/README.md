@@ -2,11 +2,25 @@
 
 Chinese documentation: [README.zh-CN.md](README.zh-CN.md)
 
+Source repository: [https://github.com/james-wangx/tc-soa-util](https://github.com/james-wangx/tc-soa-util)
+
 Teamcenter SOA Util
 
 Teamcenter version: 2512
 
-Maven artifact version: 2512.2611.02
+Maven artifact version: 2512.2611.03
+
+## Shared service-account session
+
+`AppXSharedSession` owns one process-wide Teamcenter connection. Initialize it
+with the service account at application startup and execute shared operations
+through `AppXSharedSession.execute(...)`; calls are serialized because the
+Teamcenter connection contains mutable client-side state.
+
+Use the shared session only for operations that do not need to impersonate the
+target user. Operations such as issuing a user login token still require a
+dedicated user session. Objects created for a user must have their ownership
+transferred after creation.
 
 ## Dependency packaging
 
@@ -50,3 +64,8 @@ the integration test against a Teamcenter environment:
 ```powershell
 mvn -Dtest=SecurityTokenIntegrationTest test
 ```
+
+`SharedSessionPasswordChangeIntegrationTest` verifies that a service-account
+session can change and restore another test user's password without logging
+out between operations. Set `TC_SERVICE_USERNAME`, `TC_SERVICE_PASSWORD`,
+`TC_TARGET_USERNAME`, and `TC_TARGET_PASSWORD` in addition to `TC_URL`.

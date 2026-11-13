@@ -101,6 +101,12 @@ public class TcUtil {
     private final com.teamcenter.services.internal.strong.core.SessionService internalSessionService;
 
     /**
+     * Internal User Management Service
+     */
+    private final com.teamcenter.services.internal.strong.administration.UserManagementService
+            internalUserManagementService;
+
+    /**
      * Structure Management Service
      */
     private final StructureManagementService smService;
@@ -148,6 +154,8 @@ public class TcUtil {
         this.sessionService = SessionService.getService(connection);
         this.internalSessionService =
                 com.teamcenter.services.internal.strong.core.SessionService.getService(connection);
+        this.internalUserManagementService =
+                com.teamcenter.services.internal.strong.administration.UserManagementService.getService(connection);
         this.smService = StructureManagementService.getService(connection);
         this.sqService = SavedQueryService.getService(connection);
         this.structureService = StructureService.getService(connection);
@@ -1288,9 +1296,35 @@ public class TcUtil {
      * @return true if login successfully, otherwise false
      */
     public boolean login(String username, String password, String locale, String sessionDiscriminator) {
+        return login(username, password, "", "", locale, sessionDiscriminator);
+    }
+
+    /**
+     * Login to tc with an explicit group and role.
+     *
+     * @param username             the username
+     * @param password             the password
+     * @param group                the group; empty selects the user's default
+     * @param role                 the role; empty selects the default role
+     * @param locale               the locale, e.g. en_US, zh_CN
+     * @param sessionDiscriminator session discriminator
+     * @return true if login succeeds
+     */
+    public boolean login(
+            String username,
+            String password,
+            String group,
+            String role,
+            String locale,
+            String sessionDiscriminator) {
         try {
-            Session.LoginResponse response = sessionService.login(username, password, "", "", locale,
-                                                                  sessionDiscriminator);
+            Session.LoginResponse response = sessionService.login(
+                    username,
+                    password,
+                    group == null ? "" : group,
+                    role == null ? "" : role,
+                    locale,
+                    sessionDiscriminator);
             log.info("Login successful as user '{}'.", username);
             return true;
         } catch (InvalidCredentialsException e) {
@@ -1313,6 +1347,31 @@ public class TcUtil {
             log.error("Failed to obtain security token.", e);
             return Optional.empty();
         }
+    }
+
+    /**
+     * Change the current user's Teamcenter password.
+     *
+     * @param userId          Teamcenter user ID
+     * @param currentPassword current Teamcenter password
+     * @param newPassword     new Teamcenter password
+     * @return true when Teamcenter accepts the password change
+     * @throws ServiceException when Teamcenter rejects the operation
+     */
+    public boolean resetUserPassword(
+            String userId,
+            String currentPassword,
+            String newPassword) throws ServiceException {
+        boolean changed = internalUserManagementService.resetUserPassword(
+                userId,
+                currentPassword,
+                newPassword);
+        if (changed) {
+            log.info("Password change successful for user '{}'.", userId);
+        } else {
+            log.warn("Password change rejected for user '{}'.", userId);
+        }
+        return changed;
     }
 
     /**

@@ -2,6 +2,8 @@
 
 Teamcenter SOA Utilities
 
+Source repository: [https://github.com/james-wangx/tc-soa-util](https://github.com/james-wangx/tc-soa-util)
+
 ## Modules
 
 All modules share the same Maven artifact ID and are distinguished by their Teamcenter-compatible versions.
@@ -11,7 +13,7 @@ All modules share the same Maven artifact ID and are distinguished by their Team
 | `tc-soa-util-11.2` | 11.2 | `11.2.2611.01` |
 | `tc-soa-util-13.3` | 13.3 | `13.3.2611.01` |
 | `tc-soa-util-2506` | 2506 | `2506.2611.01` |
-| `tc-soa-util-2512` | 2512 | `2512.2611.01` |
+| `tc-soa-util-2512` | 2512 | `2512.2611.03` |
 
 Dependency coordinates:
 

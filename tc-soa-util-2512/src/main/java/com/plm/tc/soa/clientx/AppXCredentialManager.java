@@ -60,8 +60,8 @@ public class AppXCredentialManager implements CredentialManager {
      */
     public String[] getCredentials(InvalidCredentialsException e)
             throws CanceledOperationException {
-        System.out.println(e.getMessage());
-        return promptForCredentials();
+        String message = e.getMessage() == null ? "" : e.getMessage();
+        throw new CanceledOperationException(message);
     }
 
     /**
@@ -71,6 +71,9 @@ public class AppXCredentialManager implements CredentialManager {
      * @see CredentialManager#getCredentials(InvalidUserException)
      */
     public String[] getCredentials(InvalidUserException e) {
+        if (hasCachedCredentials()) {
+            return credentials();
+        }
         throw new SoaConnException("Session has expired, please login again.");
     }
 
@@ -120,8 +123,15 @@ public class AppXCredentialManager implements CredentialManager {
             throw new CanceledOperationException(message);
         }
 
-        String[] tokens = {name, password, group, role, discriminator};
-        return tokens;
+        return credentials();
+    }
+
+    private boolean hasCachedCredentials() {
+        return name != null && !name.isBlank() && password != null;
+    }
+
+    private String[] credentials() {
+        return new String[]{name, password, group, role, discriminator};
     }
 
 }
